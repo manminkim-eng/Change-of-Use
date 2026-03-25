@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#4a8cf5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="용도변경판정">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="용도변경판정">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+<link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144x144.png">
+<link rel="shortcut icon" href="icons/favicon.ico">
+<meta name="description" content="건축법 제19조 기준 건축물 용도변경 가능 여부 자동 판정 — MANMIN-Ver.1">
+<title>건축물 용도변경 판정기 [MANMIN-Ver.1]</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   MANMIN Design System Ver.1
+   기존 시리즈 통일 + 중앙배치 + 탭추가
+═══════════════════════════════════════ */
+:root{
+  --bg0:#0b0e17;--bg1:#111420;--bg2:#161925;--bg3:#1c2030;--bg4:#222639;
+  --bd0:rgba(255,255,255,0.06);--bd1:rgba(255,255,255,0.10);--bd2:rgba(255,255,255,0.16);
+  --t0:#ffffff;--t1:#dde2f0;--t2:#8892aa;--t3:#50596e;
+  --blue:#4a8cf5;--blue2:#2d74ee;--bbg:rgba(74,140,245,0.08);--bbd:rgba(74,140,245,0.25);
+  --green:#22c55e;--gbg:rgba(34,197,94,0.07);--gbd:rgba(34,197,94,0.28);
+  --amber:#f0b429;--abg:rgba(240,180,41,0.07);--abd:rgba(240,180,41,0.28);
+  --orange:#f97316;--obg:rgba(249,115,22,0.07);--obd:rgba(249,115,22,0.28);
+  --red:#ef4444;--rbg:rgba(239,68,68,0.07);--rbd:rgba(239,68,68,0.25);
+  --teal:#06b6d4;--tbg:rgba(6,182,212,0.07);--tbd:rgba(6,182,212,0.28);
+  --font:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --mono:'Source Code Pro','Noto Sans KR',monospace;
+  --rsm:6px;--rmd:10px;--rlg:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg0);color:var(--t1);font-family:var(--font);
+  font-size:15px;line-height:1.65;min-height:100vh;-webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;align-items:center;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(74,140,245,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(74,140,245,0.025) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+
+/* 화면에서 인쇄 전용 요소 숨김 */
+.print-doc-header,
+.print-step-box,
+.print-step-label,
+.print-step-value,
+.print-step-group,
+.print-step-arrow,
+.print-doc-footer { display: none; }
+
+/* ── 전체 래퍼 중앙배치 ── */
+.page-center{
+  width:100%;display:flex;flex-direction:column;align-items:center;
+  position:relative;z-index:1;
+}
+
+/* ── 헤더 ── */
+.site-header{
+  width:100%;background:rgba(11,14,23,0.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--bd0);
+  position:sticky;top:0;z-index:200;
+}
+.hinner{
+  max-width:980px;margin:0 auto;
+  padding:.875rem 1.5rem;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:1rem;flex-wrap:wrap;
+}
+.logo-mark{
+  width:36px;height:36px;border-radius:8px;
+  background:var(--bbg);border:1px solid var(--bbd);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:12px;font-weight:600;color:var(--blue);flex-shrink:0;
+}
+.hlogo{display:flex;align-items:center;gap:10px;margin-bottom:.4rem}
+.hseries{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--blue);text-transform:uppercase}
+.htitle{font-size:clamp(1.2rem,3.5vw,1.6rem);font-weight:700;color:var(--t0);line-height:1.2;margin-bottom:.25rem}
+.htitle em{color:var(--blue);font-style:normal}
+.hsub{font-size:11px;color:var(--t3);font-family:var(--mono)}
+.hbadges{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.ver-badge{
+  font-family:var(--mono);font-size:11px;padding:5px 12px;
+  border-radius:var(--rsm);border:1px solid var(--bd2);color:var(--t2);white-space:nowrap;
+}
+/* ── PWA 설치 버튼 (헤더 내) ── */
+.pwa-btn{
+  font-size:11px;padding:5px 12px;border-radius:var(--rsm);
+  background:var(--bbg);border:1px solid var(--bbd);
+  color:var(--blue);cursor:pointer;display:none;font-family:var(--font);
+  transition:background .15s;
+}
+.pwa-btn:hover{background:rgba(74,140,245,.15);}
+
+/* ── PWA 설치 배너 (화면 하단 고정) ── */
+.pwa-banner{
+  position:fixed;bottom:0;left:0;right:0;z-index:500;
+  background:var(--bg1);
+  border-top:1px solid var(--bbd);
+  padding:1rem 1.25rem;
+  display:none;
+  align-items:center;gap:1rem;flex-wrap:wrap;
+  box-shadow:0 -4px 24px rgba(0,0,0,.4);
+  animation:slideUp .3s ease;
+}
+.pwa-banner.show{display:flex;}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.pwa-banner-icon{
+  width:52px;height:52px;border-radius:14px;
+  background:var(--bbg);border:1px solid var(--bbd);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;overflow:hidden;
+}
+.pwa-banner-icon img{width:100%;height:100%;object-fit:cover;border-radius:14px;}
+.pwa-banner-text{flex:1;min-width:180px;}
+.pwa-banner-title{font-size:14px;font-weight:500;color:var(--t0);margin-bottom:2px;}
+.pwa-banner-desc{font-size:12px;color:var(--t2);}
+.pwa-banner-btns{display:flex;gap:8px;flex-shrink:0;}
+.pwa-install-btn{
+  padding:.6rem 1.25rem;
+  background:var(--blue);color:#fff;
+  border:none;border-radius:var(--rsm);
+  font-size:13px;font-weight:500;font-family:var(--font);
+  cursor:pointer;transition:background .15s;white-space:nowrap;
+}
+.pwa-install-btn:hover{background:var(--blue2);}
+.pwa-dismiss-btn{
+  padding:.6rem 1rem;
+  background:transparent;color:var(--t3);
+  border:1px solid var(--bd1);border-radius:var(--rsm);
+  font-size:13px;font-family:var(--font);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.pwa-dismiss-btn:hover{border-color:var(--bd2);color:var(--t2);}
+
+/* iOS 설치 안내 모달 */
+.ios-guide-modal{
+  position:fixed;bottom:0;left:0;right:0;z-index:600;
+  background:var(--bg1);border-top:1px solid var(--bbd);
+  padding:1.5rem 1.25rem 2rem;
+  display:none;
+  box-shadow:0 -8px 32px rgba(0,0,0,.5);
+  border-radius:16px 16px 0 0;
+  animation:slideUp .3s ease;
+}
+.ios-guide-modal.show{display:block;}
+.ios-guide-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1.25rem;
+}
+.ios-guide-title{font-size:15px;font-weight:500;color:var(--t0);}
+.ios-guide-close{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--bg3);border:1px solid var(--bd1);
+  color:var(--t3);font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.ios-steps{display:flex;flex-direction:column;gap:.75rem;}
+.ios-step{
+  display:flex;align-items:flex-start;gap:12px;
+  background:var(--bg2);border-radius:var(--rsm);
+  padding:.75rem 1rem;border:1px solid var(--bd0);
+}
+.ios-step-num{
+  min-width:24px;height:24px;border-radius:50%;
+  background:var(--bbg);border:1px solid var(--bbd);
+  color:var(--blue);font-family:var(--mono);font-size:11px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.ios-step-text{font-size:13px;color:var(--t2);line-height:1.5;}
+.ios-step-text strong{color:var(--t1);}
+.ios-arrow{
+  text-align:center;margin-top:1rem;padding-top:1rem;
+  border-top:1px solid var(--bd0);
+  font-size:12px;color:var(--t3);
+}
+
+
+/* ── 탭바 ── */
+.tab-bar{
+  width:100%;background:var(--bg1);
+  border-bottom:1px solid var(--bd1);
+  position:sticky;top:58px;z-index:199;
+}
+.tab-inner{
+  max-width:980px;margin:0 auto;
+  display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.tab-inner::-webkit-scrollbar{display:none}
+.tab-btn{
+  padding:.75rem 1.25rem;font-size:13px;font-family:var(--font);
+  font-weight:500;color:var(--t3);background:transparent;border:none;
+  border-bottom:2px solid transparent;cursor:pointer;
+  white-space:nowrap;transition:color .15s,border-color .15s;flex-shrink:0;
+}
+.tab-btn:hover{color:var(--t2)}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* ── 메인 콘텐츠 영역 (중앙 정렬) ── */
+.wrap{
+  width:100%;max-width:980px;
+  margin:0 auto;
+  padding:1.5rem 1.5rem 5rem;
+}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ── 법령 배너 ── */
+.law-banner{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bbg);border:1px solid var(--bbd);
+  border-left:3px solid var(--blue);border-radius:0 var(--rsm) var(--rsm) 0;
+  padding:.75rem 1rem;margin-bottom:1.5rem;
+  font-size:12.5px;color:var(--t2);flex-wrap:wrap;
+}
+.law-banner strong{color:var(--blue);font-weight:500}
+
+/* ── 스텝 바 ── */
+.steps-bar{
+  display:flex;align-items:center;gap:0;
+  margin-bottom:1.5rem;overflow-x:auto;padding-bottom:2px;
+}
+.step-item{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.sdot{
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:10px;font-weight:600;
+  border:1px solid var(--bd1);color:var(--t3);background:var(--bg2);transition:all .25s;
+}
+.sdot.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.sdot.done{background:var(--gbg);border-color:var(--green);color:var(--green)}
+.slbl{font-size:12px;color:var(--t3);transition:color .25s;white-space:nowrap}
+.slbl.active{color:var(--t1)}
+.slbl.done{color:var(--green)}
+.ssep{width:28px;height:1px;background:var(--bd0);margin:0 3px;flex-shrink:0}
+
+/* ── 카드 ── */
+.card{background:var(--bg2);border:1px solid var(--bd0);border-radius:var(--rlg);padding:1.5rem;margin-bottom:1rem}
+.chead{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:500;color:var(--t2);letter-spacing:.05em;margin-bottom:1.25rem;
+}
+.chead::before{content:'';display:block;width:3px;height:13px;background:var(--blue);border-radius:2px;flex-shrink:0}
+
+/* ── 시설군 그리드 ── */
+.fac-group{margin-bottom:1.25rem}
+.fac-group:last-child{margin-bottom:0}
+.fgt{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:.5rem;padding-left:2px}
+.fac-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px}
+.fb{
+  background:var(--bg3);border:1px solid var(--bd0);border-radius:var(--rsm);
+  padding:.6rem .85rem;color:var(--t2);font-size:13px;font-family:var(--font);
+  cursor:pointer;text-align:left;line-height:1.35;transition:all .14s;
+}
+.fb:hover{border-color:var(--bbd);color:var(--t1);background:var(--bbg)}
+.fb.sc{border-color:var(--blue);background:rgba(74,140,245,0.13);color:#fff}
+.fb.st{border-color:var(--amber);background:rgba(240,180,41,0.10);color:var(--amber)}
+.fb.dis{opacity:.32;cursor:not-allowed}
+.bgn{display:block;font-family:var(--mono);font-size:9px;color:var(--t3);margin-bottom:2px}
+.fb.sc .bgn{color:rgba(74,140,245,0.6)}
+.fb.st .bgn{color:rgba(240,180,41,0.55)}
+.cbadge{font-size:9px;font-family:var(--mono);color:var(--blue);background:var(--bbg);border:1px solid var(--bbd);border-radius:3px;padding:1px 5px;margin-left:5px;vertical-align:middle}
+
+/* ── 선택 바 ── */
+.sel-bar{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap}
+.sel-box{flex:1;min-width:160px;background:var(--bg3);border:1px solid var(--bd0);border-radius:var(--rsm);padding:.75rem 1rem}
+.slabel{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--t3);margin-bottom:4px;text-transform:uppercase}
+.sval{font-size:13px;font-weight:500;color:var(--t3);min-height:20px}
+.sval.vc{color:var(--blue)}
+.sval.vt{color:var(--amber)}
+.sarrow{color:var(--t3);font-size:16px;flex-shrink:0}
+
+/* ── 버튼 ── */
+.bjudge{
+  width:100%;padding:.9rem 1.5rem;background:var(--blue);color:#fff;
+  border:none;border-radius:var(--rmd);font-size:14px;font-weight:500;
+  font-family:var(--font);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background .14s,transform .1s;margin-top:.5rem;
+}
+.bjudge:hover{background:var(--blue2)}
+.bjudge:active{transform:scale(.99)}
+.bjudge:disabled{background:var(--bg3);color:var(--t3);cursor:not-allowed;transform:none}
+.breset{
+  width:100%;padding:.65rem 1rem;background:transparent;color:var(--t3);
+  border:1px solid var(--bd1);border-radius:var(--rmd);font-size:13px;
+  font-family:var(--font);cursor:pointer;transition:all .14s;margin-top:.6rem;
+}
+.breset:hover{border-color:var(--bd2);color:var(--t2)}
+
+/* ── 결과 ── */
+.result-wrap{animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.verdict{border-radius:var(--rlg);padding:1.75rem;margin-bottom:1rem;border:1px solid}
+.vf{background:var(--gbg);border-color:var(--gbd)}
+.vr{background:var(--abg);border-color:var(--abd)}
+.vp{background:var(--obg);border-color:var(--obd)}
+.vtop{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.vicon{font-size:38px;line-height:1;flex-shrink:0}
+.vkw{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.vf .vkw{color:rgba(34,197,94,.65)}
+.vr .vkw{color:rgba(240,180,41,.65)}
+.vp .vkw{color:rgba(249,115,22,.65)}
+.vhl{font-size:clamp(1.1rem,3vw,1.5rem);font-weight:700}
+.vf .vhl{color:var(--green)}
+.vr .vhl{color:var(--amber)}
+.vp .vhl{color:var(--orange)}
+.vbody{font-size:13.5px;color:var(--t2);line-height:1.75;background:rgba(0,0,0,.22);border-radius:var(--rsm);padding:1rem 1.125rem;margin-bottom:1.125rem}
+.vbody strong{color:var(--t1);font-weight:500}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:1rem}
+.mi{background:rgba(0,0,0,.22);border-radius:var(--rsm);padding:.875rem}
+.ml{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--t3);margin-bottom:5px}
+.mv{font-size:13px;font-weight:500;color:var(--t1)}
+.proc-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.pi{display:flex;align-items:flex-start;gap:10px;background:rgba(0,0,0,.18);border-radius:var(--rsm);padding:.8rem 1rem}
+.pn{min-width:22px;height:22px;border-radius:50%;background:var(--bbg);border:1px solid var(--bbd);color:var(--blue);font-family:var(--mono);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.pt{font-size:13px;color:var(--t2);line-height:1.5}
+.pt strong{color:var(--t1);font-weight:500}
+.wbox{background:var(--rbg);border:1px solid var(--rbd);border-left:3px solid var(--red);border-radius:0 var(--rsm) var(--rsm) 0;padding:.875rem 1.1rem;margin-top:1rem}
+.wt{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:rgba(239,68,68,.75);margin-bottom:.5rem}
+.wl{list-style:none;display:flex;flex-direction:column;gap:4px}
+.wl li{font-size:12px;color:var(--t2);padding-left:12px;position:relative;line-height:1.5}
+.wl li::before{content:'·';position:absolute;left:3px;color:var(--t3)}
+.plcard{background:var(--bg3);border:1px solid var(--bd1);border-radius:var(--rmd);padding:1.1rem 1.25rem;margin-top:1rem}
+.pltop{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}
+.plttl{font-size:13px;font-weight:500;color:var(--t1)}
+.plsub{font-size:11px;color:var(--t3);margin-top:1px}
+.plrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.plurl{
+  flex:1;min-width:200px;background:var(--bg1);border:1px solid var(--bd1);
+  border-radius:var(--rsm);padding:.55rem .875rem;font-family:var(--mono);
+  font-size:11px;color:var(--blue);overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;cursor:pointer;user-select:all;
+}
+.cpbtn{
+  padding:.55rem 1rem;border-radius:var(--rsm);background:var(--bbg);
+  border:1px solid var(--bbd);color:var(--blue);font-size:12px;
+  font-family:var(--font);cursor:pointer;white-space:nowrap;transition:all .14s;flex-shrink:0;
+}
+.cpbtn:hover{background:rgba(74,140,245,.15)}
+.cpbtn.copied{color:var(--green);background:var(--gbg);border-color:var(--gbd)}
+.outbtns{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
+.obtn{
+  flex:1;min-width:140px;padding:.7rem 1rem;
+  background:var(--bg3);border:1px solid var(--bd1);border-radius:var(--rsm);
+  font-size:12.5px;font-family:var(--font);color:var(--t2);cursor:pointer;
+  transition:all .14s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.obtn:hover{border-color:var(--bbd);color:var(--blue)}
+.obtn.po{background:var(--bbg);border-color:var(--bbd);color:var(--blue)}
+
+/* ═══════════════════════════════════════
+   모바일 미리보기 탭 (별도 탭)
+   갤럭시 S24 Ultra 규격
+═══════════════════════════════════════ */
+.mob-tab-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem 0;
+}
+.mob-tab-guide{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  color:var(--t3);margin-bottom:1rem;text-transform:uppercase;text-align:center;
+}
+.mob-empty{
+  text-align:center;padding:4rem 1rem;color:var(--t3);
+}
+.mob-empty .ei{font-size:2.5rem;margin-bottom:1rem}
+.mob-empty p{font-size:14px;line-height:1.7}
+
+/* 갤럭시 S24 Ultra 프레임: CSS 412×915dp */
+.mob-frame{
+  width:412px;max-width:100%;
+  background:#080b12;
+  border:2px solid #2a2f3e;
+  border-radius:44px;
+  box-shadow:
+    0 0 0 1px #1a1e28,
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    0 32px 80px rgba(0,0,0,.75);
+  overflow:hidden;position:relative;
+}
+/* 상단 상태바 */
+.mob-statusbar{
+  height:40px;background:#050710;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;position:relative;
+}
+.mob-statusbar .st-time{font-family:var(--mono);font-size:12px;font-weight:600;color:rgba(255,255,255,.75)}
+.mob-statusbar .st-icons{font-size:11px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:4px}
+/* 펀치홀 카메라 */
+.mob-statusbar .notch-hole{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:12px;height:12px;background:#000;border-radius:50%;
+}
+/* 콘텐츠 스크롤 영역 */
+.mob-scroll{
+  height:800px;overflow-y:auto;background:#0b0e17;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;scrollbar-color:#2a2f3e transparent;
+}
+.mob-scroll::-webkit-scrollbar{width:2px}
+.mob-scroll::-webkit-scrollbar-thumb{background:#2a2f3e;border-radius:2px}
+/* 홈 인디케이터 */
+.mob-homeind{
+  height:28px;background:#050710;
+  display:flex;align-items:center;justify-content:center;
+}
+.mob-homeind-bar{width:80px;height:4px;background:rgba(255,255,255,.2);border-radius:2px}
+/* 모바일 보고서 내부 스타일 */
+.mob-rpt{padding:16px;font-family:var(--font);font-size:13px;color:#dde2f0;line-height:1.6}
+.mobhdr{text-align:center;padding:12px 0 16px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:14px}
+.mobsrs{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:#4a8cf5;text-transform:uppercase;margin-bottom:4px}
+.mobtit{font-size:15px;font-weight:700;color:#fff;margin-bottom:3px}
+.mobsub{font-size:10px;color:#50596e;font-family:var(--mono)}
+.mobvbadge{border-radius:10px;padding:14px;margin-bottom:12px;text-align:center}
+.mobvicon{font-size:28px;display:block;margin-bottom:6px}
+.mobvkw{font-family:var(--mono);font-size:9px;letter-spacing:.12em;opacity:.7;margin-bottom:3px}
+.mobvtit{font-size:17px;font-weight:700}
+.mobrow{background:rgba(255,255,255,.03);border-radius:8px;padding:9px 11px;margin-bottom:7px}
+.moblbl{font-family:var(--mono);font-size:9px;color:#50596e;letter-spacing:.07em;margin-bottom:3px}
+.mobval{font-size:12px;font-weight:500;color:#dde2f0}
+.mobsec{
+  font-size:10px;font-family:var(--mono);letter-spacing:.08em;color:#4a8cf5;
+  text-transform:uppercase;border-bottom:1px solid rgba(74,140,245,.2);
+  padding-bottom:6px;margin:14px 0 9px;
+}
+.mobpi{display:flex;gap:8px;margin-bottom:7px;align-items:flex-start}
+.mobpn{
+  min-width:18px;height:18px;border-radius:50%;
+  background:rgba(74,140,245,.12);border:1px solid rgba(74,140,245,.28);
+  color:#4a8cf5;font-family:var(--mono);font-size:9px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.mobpt{font-size:11px;color:#8892aa;line-height:1.5}
+.mobpt strong{color:#dde2f0;font-weight:500}
+.mobwarn{background:rgba(239,68,68,.06);border-left:2px solid rgba(239,68,68,.4);border-radius:0 6px 6px 0;padding:8px 10px;margin-top:10px}
+.mobwt{font-family:var(--mono);font-size:9px;color:rgba(239,68,68,.7);margin-bottom:5px;letter-spacing:.07em}
+.mobwi{font-size:10px;color:#8892aa;padding-left:10px;position:relative;margin-bottom:3px;line-height:1.45}
+.mobwi::before{content:'·';position:absolute;left:2px}
+.mobpl{margin-top:12px;padding:9px 11px;background:rgba(74,140,245,.06);border:1px solid rgba(74,140,245,.18);border-radius:7px}
+.mobpll{font-family:var(--mono);font-size:9px;color:#4a8cf5;letter-spacing:.08em;margin-bottom:4px}
+.mobplu{font-family:var(--mono);font-size:10px;color:#4a8cf5;word-break:break-all;line-height:1.4}
+.mobftr{text-align:center;padding:14px 0 8px;border-top:1px solid rgba(255,255,255,.05);margin-top:14px;font-family:var(--mono);font-size:9px;color:#50596e}
+.mobftr span{color:#4a8cf5}
+
+/* 모바일 탭 공유버튼 */
+.mob-share-btn{
+  margin-top:1rem;padding:.65rem 2rem;
+  background:var(--bbg);border:1px solid var(--bbd);
+  border-radius:var(--rmd);color:var(--blue);font-size:13px;
+  font-family:var(--font);cursor:pointer;transition:all .14s;
+}
+.mob-share-btn:hover{background:rgba(74,140,245,.15)}
+
+/* ── 참고 테이블 ── */
+.ref-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.ref-table th{text-align:left;padding:8px 12px;background:var(--bg3);color:var(--t3);font-family:var(--mono);font-size:10px;letter-spacing:.06em;border-bottom:1px solid var(--bd1);font-weight:500}
+.ref-table td{padding:8px 12px;border-bottom:1px solid var(--bd0);color:var(--t2);vertical-align:top}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table tr:hover td{background:rgba(255,255,255,.015)}
+.gtag{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bbg);color:var(--blue);white-space:nowrap;border:1px solid var(--bbd)}
+
+/* ── 빈 결과 ── */
+.empty-result{text-align:center;padding:4rem 1rem;color:var(--t3)}
+.empty-result .ei{font-size:2rem;margin-bottom:1rem}
+.empty-result p{font-size:14px}
+
+/* ═══════════════════════════════════════
+   FAB + 모달 (우측 하단)
+   사용법 + 관련법규
+═══════════════════════════════════════ */
+.fab{
+  position:fixed;bottom:1.75rem;right:1.75rem;z-index:300;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--blue);color:#fff;border:none;
+  font-size:22px;cursor:pointer;
+  box-shadow:0 4px 24px rgba(74,140,245,.45);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s,background .15s;
+}
+.fab:hover{transform:scale(1.08);background:var(--blue2)}
+
+/* 모달 오버레이 */
+.modal-overlay{
+  position:fixed;inset:0;z-index:400;
+  background:rgba(5,7,14,.6);backdrop-filter:blur(4px);
+  display:none;align-items:flex-end;justify-content:flex-end;
+  padding:1.5rem;
+}
+.modal-overlay.open{display:flex}
+
+/* 모달 패널 */
+.modal-panel{
+  width:100%;max-width:520px;
+  max-height:82vh;
+  background:var(--bg1);
+  border:1px solid var(--bd2);
+  border-radius:var(--rlg);
+  display:flex;flex-direction:column;
+  box-shadow:0 8px 40px rgba(0,0,0,.6);
+  animation:slideUp .28s ease;
+  overflow:hidden;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.25rem;
+  border-bottom:1px solid var(--bd0);
+  flex-shrink:0;
+}
+.modal-title{
+  font-size:14px;font-weight:500;color:var(--t1);
+  display:flex;align-items:center;gap:8px;
+}
+.modal-title .badge-ver{
+  font-family:var(--mono);font-size:10px;
+  padding:2px 8px;border-radius:4px;
+  background:var(--bbg);border:1px solid var(--bbd);color:var(--blue);
+}
+.modal-close{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--bg3);border:1px solid var(--bd1);
+  color:var(--t3);font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .14s;
+}
+.modal-close:hover{background:var(--bg4);color:var(--t1)}
+
+/* 모달 탭 */
+.modal-tabs{
+  display:flex;border-bottom:1px solid var(--bd0);
+  flex-shrink:0;
+}
+.mtab{
+  flex:1;padding:.6rem .5rem;font-size:12px;font-weight:500;
+  color:var(--t3);background:none;border:none;
+  border-bottom:2px solid transparent;cursor:pointer;
+  transition:color .15s,border-color .15s;
+}
+.mtab:hover{color:var(--t2)}
+.mtab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* 모달 본문 스크롤 */
+.modal-body{
+  overflow-y:auto;padding:1.25rem;flex:1;
+  scrollbar-width:thin;scrollbar-color:var(--bd1) transparent;
+}
+.modal-body::-webkit-scrollbar{width:4px}
+.modal-body::-webkit-scrollbar-thumb{background:var(--bd1);border-radius:2px}
+
+/* 모달 탭 콘텐츠 */
+.mpane{display:none}
+.mpane.active{display:block}
+
+/* 사용법 스텝 */
+.howto-step{
+  display:flex;gap:12px;align-items:flex-start;
+  background:var(--bg2);border:1px solid var(--bd0);
+  border-radius:var(--rsm);padding:1rem;margin-bottom:.75rem;
+}
+.howto-num{
+  min-width:28px;height:28px;border-radius:50%;
+  background:var(--bbg);border:1px solid var(--bbd);
+  color:var(--blue);font-family:var(--mono);font-size:11px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.howto-content{}
+.howto-title{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:4px}
+.howto-desc{font-size:12px;color:var(--t2);line-height:1.6}
+
+/* 판정 기준 카드 */
+.verdict-mini{
+  border-radius:var(--rsm);padding:.875rem 1rem;margin-bottom:.625rem;border:1px solid;
+}
+.vm-free{background:var(--gbg);border-color:var(--gbd)}
+.vm-report{background:var(--abg);border-color:var(--abd)}
+.vm-permit{background:var(--obg);border-color:var(--obd)}
+.vm-title{font-size:13px;font-weight:500;margin-bottom:4px}
+.vm-free .vm-title{color:var(--green)}
+.vm-report .vm-title{color:var(--amber)}
+.vm-permit .vm-title{color:var(--orange)}
+.vm-desc{font-size:12px;color:var(--t2);line-height:1.5}
+
+/* 법령 섹션 헤더 */
+.law-sec-hd{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  color:var(--blue);text-transform:uppercase;
+  border-bottom:1px solid var(--bbd);padding-bottom:6px;margin:1.25rem 0 .75rem;
+}
+.law-sec-hd:first-child{margin-top:0}
+
+/* 법령 항목 */
+.law-item{
+  background:var(--bg2);border:1px solid var(--bd0);
+  border-radius:var(--rsm);padding:.875rem 1rem;margin-bottom:.625rem;
+}
+.law-item-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:5px;flex-wrap:wrap}
+.law-tag{
+  font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;
+  background:var(--bbg);border:1px solid var(--bbd);color:var(--blue);
+  white-space:nowrap;flex-shrink:0;
+}
+.law-name{font-size:13px;font-weight:500;color:var(--t1)}
+.law-content{font-size:12px;color:var(--t2);line-height:1.65;margin-top:4px}
+.law-content em{color:var(--amber);font-style:normal;font-weight:500}
+.law-note{
+  font-size:11px;color:var(--t3);font-family:var(--mono);
+  margin-top:6px;padding-top:6px;border-top:1px solid var(--bd0);
+}
+
+/* 토스트 */
+.toast{
+  position:fixed;bottom:5rem;left:50%;
+  transform:translateX(-50%) translateY(10px);
+  background:rgba(34,197,94,.18);border:1px solid var(--gbd);
+  color:var(--green);font-size:12px;padding:8px 20px;
+  border-radius:20px;opacity:0;transition:all .25s;
+  z-index:500;pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ═══════════════════════════════════════
+   반응형
+═══════════════════════════════════════ */
+@media (min-width:768px) and (max-width:1023px){
+  .fac-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  .mob-frame{width:380px}
+  .hbadges{display:none}
+}
+@media (max-width:767px){
+  .wrap{padding:1rem .875rem 5rem}
+  .hinner{padding:.75rem .875rem}
+  .card{padding:1.125rem}
+  .verdict{padding:1.25rem}
+  .fac-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+  .tab-btn{padding:.65rem .875rem;font-size:12px}
+  .hbadges{display:none}
+  .htitle{font-size:1.2rem}
+  .slbl{display:none}
+  .ssep{width:16px}
+  .mob-frame{width:100%;border-radius:24px}
+  .mgrid{grid-template-columns:1fr 1fr}
+  .outbtns{flex-direction:column}
+  .obtn{min-width:unset}
+  .modal-overlay{padding:.75rem}
+  .modal-panel{max-width:100%;max-height:85vh}
+  .fab{bottom:1.25rem;right:1.25rem;width:46px;height:46px;font-size:18px}
+}
+@media (min-width:1024px){
+  .fac-grid{grid-template-columns:repeat(auto-fill,minmax(165px,1fr))}
+}
+/* ═══════════════════════════════════════
+   A4 인쇄 전용 스타일
+   출력 내용: 판정 요약 + 결과 + 행정절차
+   불필요 요소 모두 숨김
+═══════════════════════════════════════ */
+@media print {
+  /* 기본 초기화 */
+  @page {
+    size: A4 portrait;
+    margin: 18mm 20mm 18mm 20mm;
+  }
+  *,*::before,*::after { box-sizing: border-box !important; }
+
+  /* 화면 전용 요소 숨김 */
+  body::before,
+  .site-header,
+  .tab-bar,
+  .steps-bar,
+  .fab,
+  .toast,
+  .outbtns,
+  .plcard,
+  .breset,
+  .bjudge,
+  .modal-overlay,
+  .wbox,
+  .empty-result,
+  #tj,
+  #tmob,
+  #tref { display: none !important; }
+
+  /* 바디 배경 흰색 */
+  html, body {
+    background: #fff !important;
+    color: #111 !important;
+    font-family: 'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif !important;
+    font-size: 10pt !important;
+    line-height: 1.6 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body::before { display: none !important; }
+  .page-center { display: block !important; }
+  .wrap { padding: 0 !important; max-width: 100% !important; }
+
+  /* 결과 탭만 표시 */
+  .tab-pane { display: none !important; }
+  #tr { display: block !important; }
+
+  /* ── 인쇄 헤더 (문서 상단 타이틀) ── */
+  #tr::before {
+    content: '';
+    display: block;
+    width: 100%;
+    border-top: 2.5pt solid #1a3a7c;
+    margin-bottom: 0;
+  }
+  .print-doc-header {
+    display: flex !important;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 10pt 0 10pt;
+    border-bottom: 1pt solid #ccc;
+    margin-bottom: 14pt;
+  }
+  .print-doc-title {
+    font-size: 16pt !important;
+    font-weight: 700 !important;
+    color: #111 !important;
+    letter-spacing: -0.02em;
+  }
+  .print-doc-title em {
+    color: #1a3a7c !important;
+    font-style: normal !important;
+  }
+  .print-doc-meta {
+    font-size: 8pt !important;
+    color: #666 !important;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* ── STEP 요약 박스 ── */
+  .print-step-box {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8pt;
+    border: 1pt solid #ddd;
+    border-radius: 6pt;
+    padding: 10pt 14pt;
+    margin-bottom: 14pt;
+    background: #f8f9fb !important;
+    page-break-inside: avoid;
+  }
+  .print-step-item {}
+  .print-step-label {
+    font-size: 7.5pt !important;
+    color: #888 !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 4pt;
+    font-family: 'Source Code Pro',monospace !important;
+  }
+  .print-step-label.cur { color: #1a3a7c !important; }
+  .print-step-label.tgt { color: #b45309 !important; }
+  .print-step-value {
+    font-size: 11.5pt !important;
+    font-weight: 700 !important;
+    color: #111 !important;
+    line-height: 1.3;
+  }
+  .print-step-value.cur { color: #1a3a7c !important; }
+  .print-step-value.tgt { color: #b45309 !important; }
+  .print-step-group {
+    font-size: 8pt !important;
+    color: #666 !important;
+    margin-top: 2pt;
+    font-family: 'Source Code Pro',monospace !important;
+  }
+  .print-step-arrow {
+    font-size: 18pt !important;
+    color: #aaa !important;
+    text-align: center;
+  }
+
+  /* ── 판정 결과 카드 ── */
+  .verdict {
+    border: 1.5pt solid !important;
+    border-radius: 6pt !important;
+    padding: 12pt 14pt !important;
+    margin-bottom: 12pt !important;
+    page-break-inside: avoid !important;
+    background: #fff !important;
+  }
+  .vf { border-color: #16a34a !important; background: #f0fdf4 !important; }
+  .vr { border-color: #d97706 !important; background: #fffbeb !important; }
+  .vp { border-color: #ea580c !important; background: #fff7ed !important; }
+
+  .vtop {
+    display: flex !important;
+    align-items: center;
+    gap: 10pt;
+    margin-bottom: 8pt !important;
+    flex-wrap: nowrap !important;
+  }
+  .vicon { font-size: 22pt !important; line-height: 1; flex-shrink: 0; }
+  .vkw {
+    font-size: 7.5pt !important;
+    letter-spacing: 0.1em;
+    font-family: 'Source Code Pro',monospace !important;
+    font-weight: 600 !important;
+    margin-bottom: 2pt;
+  }
+  .vf .vkw { color: #16a34a !important; }
+  .vr .vkw { color: #d97706 !important; }
+  .vp .vkw { color: #ea580c !important; }
+
+  .vhl { font-size: 14pt !important; font-weight: 700 !important; color: #111 !important; }
+  .vf .vhl { color: #15803d !important; }
+  .vr .vhl { color: #b45309 !important; }
+  .vp .vhl { color: #c2410c !important; }
+
+  .vbody {
+    font-size: 9pt !important;
+    color: #333 !important;
+    background: rgba(0,0,0,0.03) !important;
+    border-radius: 4pt !important;
+    padding: 8pt 10pt !important;
+    margin-bottom: 8pt !important;
+    line-height: 1.7 !important;
+  }
+  .vbody strong { color: #111 !important; }
+
+  /* 판정 메타 그리드 */
+  .mgrid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6pt !important;
+    margin-bottom: 0 !important;
+  }
+  .mi {
+    background: #f3f4f6 !important;
+    border-radius: 4pt !important;
+    padding: 6pt 8pt !important;
+    page-break-inside: avoid;
+  }
+  .ml {
+    font-size: 7pt !important;
+    color: #888 !important;
+    font-family: 'Source Code Pro',monospace !important;
+    letter-spacing: 0.05em;
+    margin-bottom: 3pt;
+  }
+  .mv { font-size: 9pt !important; font-weight: 600 !important; color: #111 !important; }
+
+  /* ── 행정 절차 카드 ── */
+  .card {
+    background: #fff !important;
+    border: 1pt solid #e5e7eb !important;
+    border-radius: 6pt !important;
+    padding: 10pt 12pt !important;
+    margin-bottom: 10pt !important;
+  }
+  /* 첫 번째 카드(내부 STEP 박스)는 숨기고 print-step-box만 표시 */
+  .chead {
+    font-size: 8pt !important;
+    font-weight: 600 !important;
+    color: #1a3a7c !important;
+    letter-spacing: 0.05em;
+    margin-bottom: 8pt !important;
+    padding-bottom: 5pt !important;
+    border-bottom: 0.5pt solid #e5e7eb !important;
+    display: flex !important;
+    align-items: center;
+    gap: 6pt;
+  }
+  .chead::before {
+    content: '' !important;
+    display: block !important;
+    width: 2.5pt !important;
+    height: 11pt !important;
+    background: #1a3a7c !important;
+    border-radius: 1pt !important;
+    flex-shrink: 0 !important;
+  }
+  .proc-list {
+    list-style: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5pt !important;
+  }
+  .pi {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8pt !important;
+    background: #f8f9fb !important;
+    border-radius: 4pt !important;
+    padding: 6pt 8pt !important;
+    page-break-inside: avoid;
+  }
+  .pn {
+    min-width: 18pt !important;
+    height: 18pt !important;
+    border-radius: 50% !important;
+    background: #dbeafe !important;
+    border: 0.5pt solid #93c5fd !important;
+    color: #1d4ed8 !important;
+    font-size: 8pt !important;
+    font-family: 'Source Code Pro',monospace !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    margin-top: 1pt !important;
+  }
+  .pt {
+    font-size: 9pt !important;
+    color: #333 !important;
+    line-height: 1.55 !important;
+  }
+  .pt strong { color: #111 !important; font-weight: 600 !important; }
+
+  /* 페이지 나눔 제어 */
+  .card { page-break-inside: avoid; }
+  .proc-list { page-break-inside: auto; }
+  .pi { page-break-inside: avoid; }
+  .verdict { page-break-inside: avoid; }
+  .print-step-box { page-break-inside: avoid; }
+
+  /* ── 인쇄 푸터 ── */
+  .print-doc-footer {
+    display: block !important;
+    margin-top: 16pt;
+    padding-top: 8pt;
+    border-top: 0.5pt solid #ccc;
+    font-size: 7.5pt !important;
+    color: #888 !important;
+    display: flex !important;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4pt;
+  }
+}
+</style>
+</head>
+<body>
+<div class="page-center">
+
+<!-- ── 헤더 ── -->
+<header class="site-header">
+  <div class="hinner">
+    <div>
+      <div class="hlogo">
+        <div class="logo-mark">MM</div>
+        <div><div class="hseries">// MANMIN Web Series — Use Change</div></div>
+      </div>
+      <h1 class="htitle">건축물 <em>용도변경</em> 판정기 <span style="font-size:clamp(.65rem,1.8vw,.85rem);font-family:var(--mono);font-weight:500;color:var(--blue);opacity:.85;letter-spacing:.06em;vertical-align:middle;margin-left:6px">MANMIN-Ver.1</span></h1>
+      <p class="hsub">건축법 제19조 · 시행령 제14조 기준 자동 판정 시스템</p>
+    </div>
+    <div class="hbadges">
+      <div class="ver-badge">MANMIN-Ver.1 · 2025</div>
+      <button class="pwa-btn" id="pwaBtn">📲 앱 설치</button>
+    </div>
+  </div>
+</header>
+
+<!-- ── 탭바 ── -->
+<div class="tab-bar">
+  <div class="tab-inner">
+    <button class="tab-btn active" onclick="goTab('tj',this)">📐 용도변경 판정</button>
+    <button class="tab-btn" onclick="goTab('tr',this)" id="tabR">📊 판정 결과</button>
+    <button class="tab-btn" onclick="goTab('tmob',this)" id="tabMob">📱 모바일 미리보기</button>
+    <button class="tab-btn" onclick="goTab('tref',this)">📋 시설군 참고</button>
+  </div>
+</div>
+
+<!-- ── 콘텐츠 ── -->
+<div class="wrap">
+
+<!-- TAB 1: 판정 -->
+<div class="tab-pane active" id="tj">
+  <div class="law-banner">
+    <span>⚖</span>
+    <span><strong>건축법 제19조</strong>(용도변경) · <strong>건축법 시행령 제14조</strong>(용도변경) 기준 적용 · 국토계획법 시행령 별표 — 9개 시설군 29개 용도 반영</span>
+  </div>
+  <div class="steps-bar">
+    <div class="step-item"><div class="sdot active" id="sd1">1</div><span class="slbl active" id="sl1">현재 용도</span></div>
+    <div class="ssep"></div>
+    <div class="step-item"><div class="sdot" id="sd2">2</div><span class="slbl" id="sl2">변경 용도</span></div>
+    <div class="ssep"></div>
+    <div class="step-item"><div class="sdot" id="sd3">3</div><span class="slbl" id="sl3">결과 확인</span></div>
+  </div>
+  <div class="card">
+    <div class="chead">STEP 01 — 현재 건축물 용도 선택</div>
+    <div id="gCur"></div>
+  </div>
+  <div class="card" id="s2card" style="opacity:.38;pointer-events:none;transition:opacity .3s">
+    <div class="chead">STEP 02 — 변경하려는 용도 선택</div>
+    <div class="sel-bar">
+      <div class="sel-box"><div class="slabel">CURRENT — 현재 용도</div><div class="sval" id="dCur">선택 대기 중</div></div>
+      <div class="sarrow">→</div>
+      <div class="sel-box"><div class="slabel">TARGET — 변경 용도</div><div class="sval" id="dTgt">선택 대기 중</div></div>
+    </div>
+    <div id="gTgt"></div>
+  </div>
+  <button class="bjudge" id="jBtn" disabled onclick="doJudge()">▶ 용도변경 가능 여부 판정하기</button>
+  <button class="breset" onclick="doReset()">↺ 처음부터 다시 선택</button>
+</div>
+
+<!-- TAB 2: 판정 결과 -->
+<div class="tab-pane" id="tr">
+  <div id="rArea">
+    <div class="empty-result"><div class="ei">⚖</div><p>판정 탭에서 현재·변경 용도를 선택한 후<br>판정 버튼을 눌러주세요.</p></div>
+  </div>
+</div>
+
+<!-- TAB 3: 모바일 미리보기 (신설) -->
+<div class="tab-pane" id="tmob">
+  <div id="mobTabArea">
+    <div class="mob-empty">
+      <div class="ei">📱</div>
+      <p>판정 탭에서 용도변경 판정을 먼저 실행해주세요.<br><br>
+      판정 완료 후 이 탭에서<br>
+      <strong style="color:var(--t1)">갤럭시 S24 Ultra 규격</strong> 모바일 화면으로<br>
+      판정서를 미리 확인할 수 있습니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: 시설군 참고 -->
+<div class="tab-pane" id="tref">
+  <div class="card">
+    <div class="chead">건축법 시행령 별표 1 — 9개 시설군 전체 구성</div>
+    <div style="overflow-x:auto"><table class="ref-table" id="reftbl"></table></div>
+  </div>
+  <div class="card">
+    <div class="chead">용도변경 판정 기준 요약 — 건축법 제19조</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px">
+      <div style="background:var(--gbg);border:1px solid var(--gbd);border-radius:var(--rsm);padding:1rem">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:.1em;margin-bottom:6px">REGISTER REQUIRED</div>
+        <div style="font-size:13px;color:var(--t1);font-weight:500;margin-bottom:5px">📋 건축물대장 변경신청 필요</div>
+        <div style="font-size:12px;color:var(--t2)">같은 시설군 내 변경 — 건축법 제19조 제3항 (단, 별표 1 같은 호 간·1·2종 근생 상호 간은 임의변경 가능)</div>
+      </div>
+      <div style="background:var(--abg);border:1px solid var(--abd);border-radius:var(--rsm);padding:1rem">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:.1em;margin-bottom:6px">REPORT REQUIRED</div>
+        <div style="font-size:13px;color:var(--t1);font-weight:500;margin-bottom:5px">📋 신고 후 변경 가능</div>
+        <div style="font-size:12px;color:var(--t2)">상위군→하위군(번호 증가) 변경 — 건축법 제19조 제3항</div>
+      </div>
+      <div style="background:var(--obg);border:1px solid var(--obd);border-radius:var(--rsm);padding:1rem">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--orange);letter-spacing:.1em;margin-bottom:6px">PERMIT REQUIRED</div>
+        <div style="font-size:13px;color:var(--t1);font-weight:500;margin-bottom:5px">🏛 허가 후 변경 가능</div>
+        <div style="font-size:12px;color:var(--t2)">하위군→상위군(번호 감소) 변경 — 건축법 제19조 제2항</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+</div><!-- /page-center -->
+
+<!-- ── FAB ── -->
+<button class="fab" id="fabBtn" onclick="openModal()" title="사용법 및 관련 법규">📐</button>
+
+<!-- ── 모달: 사용법 + 관련법규 ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <div class="modal-title">
+        📐 가이드 &amp; 법령 참고
+        <span class="badge-ver">MANMIN-Ver.1</span>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="mtab active" onclick="goMtab('mhow',this)">🗺 사용 방법</button>
+      <button class="mtab" onclick="goMtab('mlaw',this)">⚖ 관련 법규</button>
+      <button class="mtab" onclick="goMtab('mjudge',this)">📊 판정 기준</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- 사용 방법 탭 -->
+      <div class="mpane active" id="mhow">
+        <div class="howto-step">
+          <div class="howto-num">1</div>
+          <div class="howto-content">
+            <div class="howto-title">현재 용도 선택</div>
+            <div class="howto-desc">「용도변경 판정」 탭 → STEP 01에서 <strong>현재 건축물 용도</strong>를 클릭하세요. 9개 시설군 29개 용도 중 해당 항목을 선택합니다.</div>
+          </div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-num">2</div>
+          <div class="howto-content">
+            <div class="howto-title">변경 용도 선택</div>
+            <div class="howto-desc">STEP 02가 활성화되면 <strong>변경하려는 용도</strong>를 클릭하세요. 현재 용도와 동일한 항목은 비활성화됩니다.</div>
+          </div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-num">3</div>
+          <div class="howto-content">
+            <div class="howto-title">판정 버튼 클릭</div>
+            <div class="howto-desc">「▶ 용도변경 가능 여부 판정하기」 버튼을 클릭하면 <strong>허가·신고·자유 변경</strong> 여부가 즉시 판정됩니다.</div>
+          </div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-num">4</div>
+          <div class="howto-content">
+            <div class="howto-title">판정 결과 확인</div>
+            <div class="howto-desc">「📊 판정 결과」 탭에서 상세 결과와 행정 절차, 주의사항을 확인하세요. 고유 판정 링크로 공유·북마크가 가능합니다.</div>
+          </div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-num">5</div>
+          <div class="howto-content">
+            <div class="howto-title">모바일 출력 미리보기</div>
+            <div class="howto-desc">「📱 모바일 미리보기」 탭에서 <strong>갤럭시 S24 Ultra</strong> 규격 화면으로 판정서를 확인하고 링크를 공유할 수 있습니다.</div>
+          </div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-num">6</div>
+          <div class="howto-content">
+            <div class="howto-title">A4 인쇄 / PDF 저장</div>
+            <div class="howto-desc">판정 결과 탭 하단의 「🖨 A4 인쇄 / PDF」 버튼으로 공식 판정서를 출력하거나 PDF로 저장할 수 있습니다.</div>
+          </div>
+        </div>
+        <div style="background:var(--rbg);border:1px solid var(--rbd);border-left:3px solid var(--red);border-radius:0 var(--rsm) var(--rsm) 0;padding:.875rem 1rem;margin-top:.5rem">
+          <div style="font-family:var(--mono);font-size:10px;color:rgba(239,68,68,.75);margin-bottom:.5rem;letter-spacing:.06em">⚠ 유의사항</div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.6">본 판정기는 <strong style="color:var(--t1)">건축법상 시설군 분류 기준</strong>만 판단합니다. 최종 결정은 반드시 관할 행정청 또는 건축사와 확인하세요.</div>
+        </div>
+      </div>
+
+      <!-- 관련 법규 탭 -->
+      <div class="mpane" id="mlaw">
+        <div class="law-sec-hd">핵심 적용 법령</div>
+
+        <div class="law-item">
+          <div class="law-item-top">
+            <span class="law-tag">건축법 제19조</span>
+            <span class="law-name">용도변경</span>
+          </div>
+          <div class="law-content">
+            ① 건축물의 용도변경은 변경하려는 용도의 건축기준에 맞게 하여야 한다.<br>
+            ② 사용승인을 받은 건축물의 용도를 <em>상위군</em>으로 변경하는 경우 <em>허가</em>, <em>하위군</em>으로 변경하는 경우 <em>신고</em>.<br>
+            ③ 같은 시설군 안에서 변경하려는 자는 <em>건축물대장 기재내용 변경 신청</em>을 하여야 한다. 단, 시행령 제14조 제4항(별표 1 같은 호 간, 1·2종 근린생활 상호 간)에 해당하면 임의변경 가능.<br>
+            ⑤ 허가·신고 대상으로서 바닥면적 합계 <em>100㎡ 이상</em>이면 사용승인 준용.<br>
+            ⑥ 허가 대상으로서 바닥면적 합계 <em>500㎡ 이상</em>이면 건축사 설계 의무.
+          </div>
+          <div class="law-note">국토교통부 소관 · 최근 개정 반영</div>
+        </div>
+
+        <div class="law-item">
+          <div class="law-item-top">
+            <span class="law-tag">건축법 시행령 제14조</span>
+            <span class="law-name">용도변경 절차</span>
+          </div>
+          <div class="law-content">
+            ① 시설군 분류 및 허가·신고 기준을 구체화한다.<br>
+            ② 제1항에 따른 시설군 분류는 <em>별표 1</em>에 따른다 (9개 시설군).<br>
+            ③ 바닥면적 합계 <em>100㎡ 미만</em>인 경우 신고 간소화 가능.
+          </div>
+          <div class="law-note">건축법 제19조 위임 · 시설군 별표 1 참조</div>
+        </div>
+
+        <div class="law-sec-hd">행정 절차 관련 법령</div>
+
+        <div class="law-item">
+          <div class="law-item-top">
+            <span class="law-tag">건축법 제11조</span>
+            <span class="law-name">건축 허가</span>
+          </div>
+          <div class="law-content">
+            용도변경 허가 신청 시 적용되는 건축허가 일반 규정. 허가권자(특별자치시장·시장·군수·구청장)에게 신청하며, 통상 <em>15~30일</em> 처리 기간이 소요된다.
+          </div>
+          <div class="law-note">허가 신청 → 관할 구청 건축과 · 세움터(eais.go.kr)</div>
+        </div>
+
+        <div class="law-item">
+          <div class="law-item-top">
+            <span class="law-tag">건축사법 제23조</span>
+            <span class="law-name">설계 업무 범위</span>
+          </div>
+          <div class="law-content">
+            용도변경 <em>허가</em> 대상 건축물의 설계는 건축사가 수행해야 한다. 신고 대상 중 일정 규모 이상도 건축사 설계 의무가 적용될 수 있다.
+          </div>
+          <div class="law-note">건축사 선임 필수 (허가 대상)</div>
+        </div>
+
+        <div class="law-sec-hd">관련 개별 법령 (용도별 추가 확인 필요)</div>
+
+        <div class="law-item">
+          <div class="law-item-top">
+            <span class="law-tag">소방시설법</span>
+            <span class="law-name">소방시설 설치 기준 변경</span>
+          </div>
+          <div class="law-content">
+            용도변경 시 변경 후 용도에 맞는 소방시설 기준이 새로 적용된다. 옥내소화전·스프링클러·감지기 등 설치 기준이 달라질 수 있어 <em>소방 공사</em>가 동반될 수 있다.
+          </div>
+          <div class="law-note">화재예방, 소방시설 설치·유지 및 안전관리에 관한 법률</div>
+        </div>
+
+        <div class="law-item">
+          <div class="law-item-top">
+            <span class="law-tag">주차장법</span>
+            <span class="law-name">부설주차장 설치 기준</span>
+          </div>
+          <div class="law-content">
+            용도 변경 시 새로운 용도에 맞는 <em>주차대수 기준</em>이 적용된다. 판매시설·의료시설 등으로 변경 시 주차 확보 의무가 증가할 수 있다.
+          </div>
+          <div class="law-note">주차장법 제19조 (부설주차장의 설치)</div>
+        </div>
+
+        <div class="law-item">
+          <div class="law-item-top">
+            <span class="law-tag">국토계획법</span>
+            <span class="law-name">용도지역·지구 제한</span>
+          </div>
+          <div class="law-content">
+            지목·용도지역·지구에 따라 특정 용도로의 변경이 <em>불가</em>할 수 있다. 제1종·제2종 전용주거지역에서 판매·공장시설로의 변경은 원칙적으로 허용되지 않는다.
+          </div>
+          <div class="law-note">국토의 계획 및 이용에 관한 법률 제76조 (용도지역·지구에서의 행위 제한)</div>
+        </div>
+
+        <div class="law-item">
+          <div class="law-item-top">
+            <span class="law-tag">세무 관련</span>
+            <span class="law-name">취득세·재산세 변동</span>
+          </div>
+          <div class="law-content">
+            용도변경 완료 후 <em>취득세 추가 납부</em>(주거→상업 전환 등) 및 재산세 기준이 변경될 수 있다. 세무사 또는 관할 세무서 확인을 권장한다.
+          </div>
+          <div class="law-note">지방세법 제7조 (취득의 정의) · 지방세법 제105조 (재산세 과세 대상)</div>
+        </div>
+      </div>
+
+      <!-- 판정 기준 탭 -->
+      <div class="mpane" id="mjudge">
+        <div class="verdict-mini vm-free">
+          <div class="vm-title">📋 건축물대장 변경신청 필요 — REGISTER REQUIRED</div>
+          <div class="vm-desc"><strong>같은 시설군 내 변경</strong>은 허가·신고 불필요하나, 건축물대장 기재내용 변경 신청이 원칙입니다.<br>단, 별표 1 같은 호 간 변경 또는 제1종·제2종 근린생활시설 상호 간 변경은 신청 없이 임의변경 가능.<br>근거: 건축법 제19조 제3항 · 시행령 제14조 제4항</div>
+        </div>
+        <div class="verdict-mini vm-report">
+          <div class="vm-title">📋 신고 후 변경 가능 — REPORT REQUIRED</div>
+          <div class="vm-desc"><strong>상위군(번호 낮음) → 하위군(번호 높음)</strong>으로의 변경.<br>관할 시장·군수·구청장에게 신고 후 사용 가능.<br>근거: 건축법 제19조 제3항</div>
+        </div>
+        <div class="verdict-mini vm-permit">
+          <div class="vm-title">🏛 허가 후 변경 가능 — PERMIT REQUIRED</div>
+          <div class="vm-desc"><strong>하위군(번호 높음) → 상위군(번호 낮음)</strong>으로의 변경.<br>관할 허가권자의 사전 허가 후 공사·사용 가능.<br>근거: 건축법 제19조 제2항</div>
+        </div>
+
+        <div style="margin-top:1rem;background:var(--bg2);border:1px solid var(--bd0);border-radius:var(--rsm);padding:1rem">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.08em;margin-bottom:.75rem">시설군 번호 기준 (제1군 ↔ 제9군)</div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.75">
+            시설군 번호가 <strong style="color:var(--t1)">낮을수록</strong> 더 강한 규제를 받는 용도입니다.<br>
+            제1군(자동차 관련) ← 강한 규제 — 약한 규제 → 제9군(동식물 관련)<br><br>
+            <strong style="color:var(--amber)">판정 원칙:</strong><br>
+            · 규제 강한 방향(번호 감소)으로 이동 = <strong style="color:var(--orange)">허가</strong><br>
+            · 규제 약한 방향(번호 증가)으로 이동 = <strong style="color:var(--amber)">신고</strong><br>
+            · 같은 군 내 이동 = <strong style="color:var(--green)">건축물대장 변경신청</strong> (일부 임의변경 가능)
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /modal-body -->
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────
+//  데이터
+// ─────────────────────────────────────────
+const GRP=[
+  {g:1,n:'자동차 관련 시설군',c:'#94a3b8',u:['자동차 관련 시설']},
+  {g:2,n:'산업 등의 시설군',c:'#fb923c',u:['운수시설','창고시설','공장','위험물저장 및 처리시설','자원순환 관련 시설','묘지 관련 시설','장례시설']},
+  {g:3,n:'전기통신시설군',c:'#a78bfa',u:['방송통신시설','발전시설']},
+  {g:4,n:'문화 및 집회시설군',c:'#f472b6',u:['문화 및 집회시설','종교시설','위락시설','관광휴게시설']},
+  {g:5,n:'영업시설군',c:'#34d399',u:['판매시설','운동시설','숙박시설','제2종 근린생활시설(다중생활시설)']},
+  {g:6,n:'교육 및 복지시설군',c:'#60a5fa',u:['의료시설','교육연구시설','노유자시설','수련시설','야영장시설']},
+  {g:7,n:'근린생활시설군',c:'#fbbf24',u:['제1종 근린생활시설','제2종 근린생활시설']},
+  {g:8,n:'주거업무시설군',c:'#4a8cf5',u:['단독주택','공동주택','업무시설','교정 및 군사시설']},
+  {g:9,n:'그 밖의 시설군',c:'#6b7280',u:['동물 및 식물 관련 시설']}
+];
+const U2G={},GN={};
+GRP.forEach(g=>{GN[g.g]=g.n;g.u.forEach(u=>U2G[u]=g.g)});
+let curU=null,tgtU=null,lastResult=null;
+
+// ─────────────────────────────────────────
+//  탭 전환
+// ─────────────────────────────────────────
+function goTab(id,btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(typeof btn==='object')btn.classList.add('active');
+  // 모바일 탭으로 이동 시 미리보기 갱신
+  if(id==='tmob'&&lastResult) renderMobTab(lastResult);
+}
+
+// ─────────────────────────────────────────
+//  스텝 표시
+// ─────────────────────────────────────────
+function setSt(a,d3){
+  [1,2,3].forEach(i=>{
+    const d=document.getElementById('sd'+i),l=document.getElementById('sl'+i);
+    if(d3&&i===3){d.className='sdot done';l.className='slbl done';}
+    else if(i<a){d.className='sdot done';l.className='slbl done';}
+    else if(i===a){d.className='sdot active';l.className='slbl active';}
+    else{d.className='sdot';l.className='slbl';}
+  });
+}
+
+// ─────────────────────────────────────────
+//  그리드 생성
+// ─────────────────────────────────────────
+function mkGrid(cid,fn,isTgt){
+  const box=document.getElementById(cid);box.innerHTML='';
+  GRP.forEach(g=>{
+    const gd=document.createElement('div');gd.className='fac-group';
+    gd.innerHTML=`<div class="fgt" style="color:${g.c}99">제${g.g}군 — ${g.n}</div>`;
+    const grid=document.createElement('div');grid.className='fac-grid';
+    g.u.forEach(u=>{
+      const b=document.createElement('button');b.className='fb';
+      const isCur=isTgt&&u===curU;
+      if(isCur)b.classList.add('dis');
+      b.innerHTML=`<span class="bgn">제${g.g}군</span>${u}${isCur?'<span class="cbadge">현재</span>':''}`;
+      b.onclick=()=>{if(isCur)return;fn(u,g.g,b)};
+      grid.appendChild(b);
+    });
+    gd.appendChild(grid);box.appendChild(gd);
+  });
+}
+
+function selCur(u,g,btn){
+  curU=u;tgtU=null;
+  document.querySelectorAll('#gCur .fb').forEach(b=>b.classList.remove('sc'));
+  btn.classList.add('sc');
+  const s2=document.getElementById('s2card');
+  s2.style.opacity='1';s2.style.pointerEvents='auto';
+  document.getElementById('dCur').textContent=`제${g}군 · ${u}`;
+  document.getElementById('dCur').className='sval vc';
+  document.getElementById('dTgt').textContent='선택 대기 중';
+  document.getElementById('dTgt').className='sval';
+  document.getElementById('jBtn').disabled=true;
+  document.getElementById('rArea').innerHTML='<div class="empty-result"><div class="ei">⚖</div><p>판정 탭에서 현재·변경 용도를 선택한 후<br>판정 버튼을 눌러주세요.</p></div>';
+  document.getElementById('mobTabArea').innerHTML='<div class="mob-empty"><div class="ei">📱</div><p>판정 버튼을 눌러주세요.</p></div>';
+  setSt(2);mkGrid('gTgt',selTgt,true);
+  s2.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function selTgt(u,g,btn){
+  tgtU=u;
+  document.querySelectorAll('#gTgt .fb').forEach(b=>b.classList.remove('st'));
+  btn.classList.add('st');
+  document.getElementById('dTgt').textContent=`제${g}군 · ${u}`;
+  document.getElementById('dTgt').className='sval vt';
+  document.getElementById('jBtn').disabled=false;
+  setSt(3);
+}
+
+// ─────────────────────────────────────────
+//  판정
+// ─────────────────────────────────────────
+function doJudge(){
+  if(!curU||!tgtU)return;
+  const fg=U2G[curU],tg=U2G[tgtU];
+  let type=fg===tg?(curU===tgtU?'same':'free'):tg>fg?'report':'permit';
+  const hash=`#from=${encodeURIComponent(curU)}&to=${encodeURIComponent(tgtU)}`;
+  const pl=location.href.split('#')[0]+hash;
+  history.replaceState(null,'',hash);
+  lastResult={fg,tg,type,pl,curU,tgtU};
+  buildResult(fg,tg,type,pl);
+  renderMobTab(lastResult);
+  setSt(3,true);
+  goTab('tr',document.getElementById('tabR'));
+  document.getElementById('tr').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ─────────────────────────────────────────
+//  판정 결과 (데스크탑 탭)
+// ─────────────────────────────────────────
+function buildResult(fg,tg,type,pl){
+  const DATE=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  const T={
+    free:{cls:'vf',ic:'📋',kw:'REGISTER REQUIRED',hl:'건축물대장 변경신청 필요'},
+    report:{cls:'vr',ic:'📋',kw:'REPORT REQUIRED',hl:'신고 후 변경 가능'},
+    permit:{cls:'vp',ic:'🏛',kw:'PERMIT REQUIRED',hl:'허가 후 변경 가능'},
+    same:{cls:'vf',ic:'ℹ',kw:'SAME USE',hl:'동일 용도 — 변경 불필요'}
+  };
+  const c=T[type];
+  const DESC={
+    free:`현재 용도(<strong>${curU}</strong>)와 변경 용도(<strong>${tgtU}</strong>)는 모두 <strong>제${fg}군 ${GN[fg]}</strong>에 속합니다.<br><br>같은 시설군 내 변경은 <strong>허가·신고는 불필요</strong>하지만, 건축법 제19조 제3항에 따라 <strong>관할 시장·군수·구청장에게 건축물대장 기재내용 변경을 신청</strong>하여야 합니다.<br><br>단, 별표 1의 <strong>같은 호</strong>에 속하는 용도 간 변경이거나 제1종·제2종 근린생활시설 상호 간 변경인 경우에는 신청 없이 <strong>임의변경</strong>도 가능합니다(시행령 제14조 제4항).`,
+    report:`제${fg}군(${GN[fg]}) → 제${tg}군(${GN[tg]})으로의 변경은 <strong>상위 시설군에서 하위 시설군으로의 이동</strong>에 해당합니다.<br><br>건축법 제19조 제3항에 따라 <strong>관할 특별자치시장·시장·군수·구청장에게 신고</strong>하면 용도변경이 가능합니다.`,
+    permit:`제${fg}군(${GN[fg]}) → 제${tg}군(${GN[tg]})으로의 변경은 <strong>하위 시설군에서 상위 시설군으로의 이동</strong>에 해당합니다.<br><br>건축법 제19조 제2항에 따라 <strong>관할 허가권자(시장·군수·구청장)의 허가</strong>를 받아야 합니다.`,
+    same:`선택하신 현재 용도와 변경 용도가 <strong>동일한 용도</strong>입니다. 용도변경이 불필요합니다.`
+  };
+  const PROCS={
+    free:[
+      ['건축물대장 변경신청 (원칙)','같은 시설군 내 변경 시 관할 시장·군수·구청장에게 건축물대장 기재내용 변경 신청 (건축법 제19조 제3항)'],
+      ['임의변경 가능 여부 확인','별표 1 같은 호 간 변경 또는 1종·2종 근린생활시설 상호 간 변경은 신청 없이 임의변경 가능 (시행령 제14조 제4항)'],
+      ['개별 법령 추가 확인','소방·위생·영업 등 해당 법령에 따른 신고·허가 별도 검토']
+    ],
+    report:[
+      ['용도변경 신고서 작성','건축물 현황도·배치도·평면도 등 도서 준비'],
+      ['관할 구청 건축과 신고','방문 또는 세움터(eais.go.kr) 온라인 신고'],
+      ['신고 수리 확인','접수일로부터 통상 3~7일 이내 처리'],
+      ['건축물대장 변경 확인','신고 수리 후 건축물대장 용도 변경 반영'],
+      ['개별 법령 신고·허가 이행','소방·위생·영업 등 해당 법령 추가 절차']
+    ],
+    permit:[
+      ['건축사 선임 (의무)','용도변경 허가 설계는 건축사법에 따라 건축사가 수행'],
+      ['허가 신청서 및 설계도서 준비','배치도·평면도·입면도·구조도 등 허가 도서 작성'],
+      ['관할 구청 제출','세움터 또는 방문 접수, 소방·도시계획 등 협의'],
+      ['허가 처리 대기','통상 15~30일 소요 (협의 포함 시 추가)'],
+      ['허가 취득 후 공사 착공','필요 시 착공신고 및 감리자 지정'],
+      ['사용승인 신청 및 취득','공사 완료 후 사용승인 → 건축물대장 변경']
+    ],
+    same:[]
+  };
+  const WARNS={
+    free:[
+      '원칙적으로 건축물대장 기재내용 변경 신청이 필요합니다(건축법 제19조 제3항). 별표 1 같은 호 간 변경 또는 1·2종 근린생활시설 상호 간 변경만 임의변경 가능합니다.',
+      '목욕장, 생활숙박시설, 골프연습장 등 특정 용도로의 변경은 같은 시설군 내라도 임의변경이 제외됩니다(시행령 제14조 제4항 단서).',
+      '바닥면적 합계 100㎡ 이상이면 사용승인이 준용됩니다(건축법 제19조 제5항).',
+      '허가 대상 변경으로서 바닥면적 합계 500㎡ 이상이면 건축사 설계 의무가 적용됩니다(건축법 제19조 제6항).',
+      '소방법·식품위생법·의료법 등 개별 법령에 따른 신고·허가는 별도 검토하세요.',
+      '본 판정기는 건축법상 시설군 분류 기준만 판단하며, 최종 결정은 관할 행정청에 확인하세요.'
+    ],
+    report:['바닥면적 합계 100㎡ 미만인 경우 일부 서류 간소화 가능합니다.','소방시설 설치기준 변경으로 인한 소방 공사가 동반될 수 있습니다.','주차대수 기준 변경에 따라 주차장 확보 여부를 확인하세요.','용도지역·지구에 따라 신고 불가 용도가 있을 수 있습니다.','본 판정기는 건축법상 시설군 기준만 판단하며, 최종 결정은 관할 행정청에 확인하세요.'],
+    permit:['허가 없이 용도를 변경·사용하면 이행강제금 및 원상복구 명령 대상이 됩니다.','허가 시 구조 안전·피난방화·소방·에너지 등 종합 심사가 포함됩니다.','용도변경 후 취득세·재산세 등 세금이 변경될 수 있으니 세무 전문가 확인을 권장합니다.','주거지역에서 상업용도로의 변경은 도시계획 규제로 허가가 불가할 수 있습니다.','반드시 건축사 또는 관할 행정청과 사전 상담 후 진행하세요.'],
+    same:[]
+  };
+  const mc={free:'var(--green)',report:'var(--amber)',permit:'var(--orange)',same:'var(--green)'};
+  const mv=mc[type];
+  const dir=fg===tg?'동일군 내 변경':`제${fg}군 → 제${tg}군 (${tg>fg?'하향':'상향'})`;
+  const proc=PROCS[type],warn=WARNS[type];
+  const procLabel=type==='report'?'신고':'허가';
+
+  /* ── 인쇄 전용: 문서 헤더 ── */
+  const printHeader=`
+  <div class="print-doc-header">
+    <div>
+      <div class="print-doc-title">건축물 <em>용도변경</em> 판정서</div>
+      <div style="font-size:8pt;color:#888;margin-top:3pt;font-family:'Source Code Pro',monospace">MANMIN-Ver.1 · 건축법 제19조 · 건축법 시행령 제14조</div>
+    </div>
+    <div class="print-doc-meta">
+      판정 일자: ${DATE}<br>
+      판정 기준: 건축법 제19조${type==='report'?' 제3항':type==='permit'?' 제2항':''}<br>
+      시설군 분류: 건축법 시행령 별표 1
+    </div>
+  </div>`;
+
+  /* ── 인쇄 전용: STEP 01·02 선택 요약 ── */
+  const printStepBox=`
+  <div class="print-step-box">
+    <div class="print-step-item">
+      <div class="print-step-label cur">STEP 01 — 현재 용도</div>
+      <div class="print-step-value cur">${curU}</div>
+      <div class="print-step-group">제${fg}군 · ${GN[fg]}</div>
+    </div>
+    <div class="print-step-arrow">→</div>
+    <div class="print-step-item">
+      <div class="print-step-label tgt">STEP 02 — 변경 용도</div>
+      <div class="print-step-value tgt">${tgtU}</div>
+      <div class="print-step-group">제${tg}군 · ${GN[tg]}</div>
+    </div>
+  </div>`;
+
+  /* ── 인쇄 전용: 문서 푸터 ── */
+  const printFooter=`
+  <div class="print-doc-footer">
+    <span>MANMIN-Ver.1 · 건축물 용도변경 판정기</span>
+    <span>건축법 제19조 · 시행령 제14조 기준 자동 판정 시스템</span>
+    <span>본 판정서는 참고용이며 최종 판단은 관할 행정청에 확인하세요.</span>
+  </div>`;
+
+  /* ── 화면 + 인쇄 공통 HTML ── */
+  let html=`<div class="result-wrap">
+  ${printHeader}
+  ${printStepBox}
+  <div class="verdict ${c.cls}">
+    <div class="vtop"><div class="vicon">${c.ic}</div><div><div class="vkw">${c.kw}</div><div class="vhl">${c.hl}</div></div></div>
+    <div class="vbody">${DESC[type]}</div>
+    <div class="mgrid">
+      <div class="mi"><div class="ml">현재 용도</div><div class="mv">${curU} (제${fg}군)</div></div>
+      <div class="mi"><div class="ml">변경 용도</div><div class="mv">${tgtU} (제${tg}군)</div></div>
+      <div class="mi"><div class="ml">시설군 이동</div><div class="mv" style="color:${mv}">${dir}</div></div>
+      <div class="mi"><div class="ml">행정 절차</div><div class="mv" style="color:${mv}">${type==='free'?'대장 변경신청':type==='report'?'신고':type==='permit'?'허가':'해당 없음'}</div></div>
+      <div class="mi"><div class="ml">판정 기준</div><div class="mv">건축법 제19조${type==='report'?' 제3항':type==='permit'?' 제2항':''}</div></div>
+      <div class="mi"><div class="ml">판정 일자</div><div class="mv">${DATE}</div></div>
+    </div>
+  </div>`;
+
+  if(proc.length){
+    html+=`<div class="card"><div class="chead">행정 절차 안내 — ${procLabel} 프로세스</div>
+    <ul class="proc-list">${proc.map((p,i)=>`<li class="pi"><span class="pn">${i+1}</span><span class="pt"><strong>${p[0]}</strong> — ${p[1]}</span></li>`).join('')}</ul></div>`;
+  }
+  if(warn.length){
+    html+=`<div class="wbox"><div class="wt">⚠ 주의사항 및 추가 검토 사항</div><ul class="wl">${warn.map(w=>`<li>${w}</li>`).join('')}</ul></div>`;
+  }
+  html+=`${printFooter}
+  <div class="plcard">
+    <div class="pltop"><span>🔗</span><div><div class="plttl">고유 판정 링크 생성됨</div><div class="plsub">이 URL로 현재 판정 결과를 공유·북마크할 수 있습니다</div></div></div>
+    <div class="plrow"><div class="plurl" id="plUrl" onclick="cpLink()">${pl}</div><button class="cpbtn" id="cpBtn" onclick="cpLink()">링크 복사</button></div>
+  </div>
+  <div class="outbtns">
+    <button class="obtn po" onclick="goTab('tmob',document.getElementById('tabMob'))">📱 모바일 미리보기</button>
+    <button class="obtn" onclick="window.print()">🖨 A4 인쇄 / PDF</button>
+    <button class="obtn" onclick="cpLink()">🔗 링크 복사</button>
+  </div>
+  </div>`;
+
+  document.getElementById('rArea').innerHTML=html;
+}
+
+// ─────────────────────────────────────────
+//  모바일 미리보기 탭 렌더링
+//  갤럭시 S24 Ultra (412×915 dp)
+// ─────────────────────────────────────────
+function renderMobTab(r){
+  const {fg,tg,type,pl}=r;
+  const CU=r.curU,TU=r.tgtU;
+  const DATE=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  const TIME=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  const CM={
+    free:{bg:'rgba(34,197,94,.08)',bd:'rgba(34,197,94,.28)',ic:'📋',kw:'REGISTER REQUIRED',tit:'건축물대장 변경신청 필요',tc:'#22c55e'},
+    report:{bg:'rgba(240,180,41,.08)',bd:'rgba(240,180,41,.28)',ic:'📋',kw:'REPORT REQUIRED',tit:'신고 후 변경 가능',tc:'#f0b429'},
+    permit:{bg:'rgba(249,115,22,.08)',bd:'rgba(249,115,22,.28)',ic:'🏛',kw:'PERMIT REQUIRED',tit:'허가 후 변경 가능',tc:'#f97316'},
+    same:{bg:'rgba(34,197,94,.08)',bd:'rgba(34,197,94,.28)',ic:'ℹ',kw:'SAME USE',tit:'동일 용도 — 변경 불필요',tc:'#22c55e'}
+  };
+  const cf=CM[type];
+  const MP={
+    free:[
+      ['대장 변경신청 (원칙)','관할 시장·군수·구청장에게 건축물대장 기재내용 변경 신청'],
+      ['임의변경 가능 여부 확인','별표 1 같은 호 간 또는 1·2종 근린생활 상호 간은 신청 불필요'],
+      ['개별 법령 확인','소방·위생 등 해당 법령 추가 검토']
+    ],
+    report:[
+      ['신고서 작성','건축물 현황도·배치도·평면도 등 도서 준비'],
+      ['구청 건축과 신고','방문 또는 세움터 온라인 신고'],
+      ['신고 수리 확인','통상 3~7일 이내 처리'],
+      ['건축물대장 변경','신고 수리 후 용도 변경 반영'],
+      ['개별 법령 이행','소방·위생 등 추가 절차']
+    ],
+    permit:[
+      ['건축사 선임 (의무)','용도변경 허가는 건축사가 수행'],
+      ['허가 도서 준비','배치도·평면도·구조도 등 작성'],
+      ['관할 구청 제출','세움터 또는 방문 접수'],
+      ['허가 처리 대기','통상 15~30일 소요'],
+      ['공사 착공','허가 취득 후 착공신고'],
+      ['사용승인 취득','공사 완료 후 준공·대장 변경']
+    ],
+    same:[]
+  };
+  const MW={
+    free:['원칙적으로 건축물대장 변경신청 필요(건축법 제19조 제3항)','목욕장·생활숙박시설 등 특정 용도는 임의변경 제외','100㎡↑ 사용승인 준용 · 허가 대상 500㎡↑ 건축사 설계 의무','관할 행정청 최종 확인 권장'],
+    report:['소방시설 변경 공사 동반 가능','주차대수 기준 변경 확인 필요','관할 행정청 최종 확인 권장'],
+    permit:['허가 없이 변경 시 이행강제금 대상','건축사와 사전 상담 필수','세금 변경 가능 — 세무 전문가 확인'],
+    same:[]
+  };
+  const procs=MP[type],warns=MW[type];
+
+  const mobHTML=`
+  <div class="mob-tab-wrap">
+    <div class="mob-tab-guide">📱 갤럭시 S24 Ultra — 412 × 915 dp 기준 미리보기</div>
+    <div class="mob-frame">
+      <!-- 상태바 (펀치홀 카메라) -->
+      <div class="mob-statusbar">
+        <span class="st-time">${TIME}</span>
+        <div class="notch-hole"></div>
+        <span class="st-icons">▲ ▼ 📶 🔋</span>
+      </div>
+      <!-- 콘텐츠 스크롤 -->
+      <div class="mob-scroll">
+        <div class="mob-rpt">
+          <div class="mobhdr">
+            <div class="mobsrs">// MANMIN-Ver.1 · Use Change</div>
+            <div class="mobtit">건축물 용도변경 판정서</div>
+            <div class="mobsub">건축법 제19조 · ${DATE}</div>
+          </div>
+          <div class="mobvbadge" style="background:${cf.bg};border:1px solid ${cf.bd}">
+            <span class="mobvicon">${cf.ic}</span>
+            <div class="mobvkw" style="color:${cf.tc}99">${cf.kw}</div>
+            <div class="mobvtit" style="color:${cf.tc}">${cf.tit}</div>
+          </div>
+          <div class="mobrow">
+            <div class="moblbl">CURRENT — 현재 용도</div>
+            <div class="mobval" style="color:#4a8cf5">${CU}</div>
+            <div style="font-size:10px;color:#50596e;margin-top:2px;font-family:'JetBrains Mono',monospace">제${fg}군 · ${GN[fg]}</div>
+          </div>
+          <div style="text-align:center;color:#50596e;font-size:14px;margin:4px 0">↓</div>
+          <div class="mobrow">
+            <div class="moblbl">TARGET — 변경 용도</div>
+            <div class="mobval" style="color:#f0b429">${TU}</div>
+            <div style="font-size:10px;color:#50596e;margin-top:2px;font-family:'JetBrains Mono',monospace">제${tg}군 · ${GN[tg]}</div>
+          </div>
+          ${procs.length?`
+          <div class="mobsec">행정 절차</div>
+          ${procs.map((p,i)=>`<div class="mobpi"><div class="mobpn">${i+1}</div><div class="mobpt"><strong>${p[0]}</strong><br>${p[1]}</div></div>`).join('')}`:''}
+          ${warns.length?`
+          <div class="mobwarn">
+            <div class="mobwt">⚠ 주의사항</div>
+            ${warns.map(w=>`<div class="mobwi">${w}</div>`).join('')}
+          </div>`:''}
+          <div class="mobpl">
+            <div class="mobpll">🔗 고유 판정 링크</div>
+            <div class="mobplu">${pl}</div>
+          </div>
+          <div class="mobsec" style="margin-top:16px">법령 근거</div>
+          <div style="font-size:10px;color:#8892aa;line-height:1.6">건축법 제19조(용도변경) · 건축법 시행령 제14조 · 9개 시설군 기준</div>
+          <div class="mobftr">
+            <span>MANMIN</span>-Ver.1<br>
+            건축법 제19조 · 시행령 제14조 기준 자동 판정 시스템
+          </div>
+        </div>
+      </div>
+      <!-- 홈 인디케이터 -->
+      <div class="mob-homeind"><div class="mob-homeind-bar"></div></div>
+    </div>
+    <button class="mob-share-btn" onclick="cpLinkMob('${pl}')">🔗 판정 링크 복사</button>
+  </div>`;
+
+  document.getElementById('mobTabArea').innerHTML=mobHTML;
+}
+
+// ─────────────────────────────────────────
+//  모달 제어
+// ─────────────────────────────────────────
+function openModal(){
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function closeModalOutside(e){
+  if(e.target===document.getElementById('modalOverlay'))closeModal();
+}
+function goMtab(id,btn){
+  document.querySelectorAll('.mpane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+// ─────────────────────────────────────────
+//  링크 복사
+// ─────────────────────────────────────────
+function cpLink(){
+  const url=document.getElementById('plUrl')?.textContent;if(!url)return;
+  _copy(url,()=>{
+    const b=document.getElementById('cpBtn');
+    if(b){b.textContent='✓ 복사됨';b.classList.add('copied');setTimeout(()=>{b.textContent='링크 복사';b.classList.remove('copied')},2000);}
+  });
+}
+function cpLinkMob(url){_copy(url,()=>toast('링크가 클립보드에 복사됐습니다'));}
+function _copy(url,cb){
+  navigator.clipboard.writeText(url).then(cb).catch(()=>{
+    const t=document.createElement('textarea');t.value=url;
+    document.body.appendChild(t);t.select();document.execCommand('copy');
+    document.body.removeChild(t);cb();
+  });
+  toast('링크가 클립보드에 복사됐습니다');
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ─────────────────────────────────────────
+//  리셋
+// ─────────────────────────────────────────
+function doReset(){
+  curU=null;tgtU=null;lastResult=null;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('sc','st'));
+  document.getElementById('dCur').textContent='선택 대기 중';document.getElementById('dCur').className='sval';
+  document.getElementById('dTgt').textContent='선택 대기 중';document.getElementById('dTgt').className='sval';
+  document.getElementById('jBtn').disabled=true;
+  document.getElementById('rArea').innerHTML='<div class="empty-result"><div class="ei">⚖</div><p>판정 탭에서 현재·변경 용도를 선택한 후<br>판정 버튼을 눌러주세요.</p></div>';
+  document.getElementById('mobTabArea').innerHTML='<div class="mob-empty"><div class="ei">📱</div><p>판정 탭에서 용도변경 판정을 먼저 실행해주세요.<br><br>판정 완료 후 이 탭에서<br><strong style="color:var(--t1)">갤럭시 S24 Ultra 규격</strong> 모바일 화면으로<br>판정서를 미리 확인할 수 있습니다.</p></div>';
+  const s2=document.getElementById('s2card');s2.style.opacity='.38';s2.style.pointerEvents='none';
+  setSt(1);history.replaceState(null,'',location.pathname);
+  goTab('tj',document.querySelectorAll('.tab-btn')[0]);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─────────────────────────────────────────
+//  참고 테이블
+// ─────────────────────────────────────────
+function buildRefTable(){
+  const t=document.getElementById('reftbl');
+  t.innerHTML=`<thead><tr><th>시설군</th><th>군 명칭</th><th>포함 용도</th></tr></thead>
+  <tbody>${GRP.map(g=>`<tr>
+    <td><span class="gtag">제${g.g}군</span></td>
+    <td style="color:${g.c};font-weight:500;font-size:12px">${g.n}</td>
+    <td style="font-size:12px">${g.u.join(', ')}</td>
+  </tr>`).join('')}</tbody>`;
+}
+
+// ─────────────────────────────────────────
+//  URL 해시 복원
+// ─────────────────────────────────────────
+function fromHash(){
+  const h=location.hash;if(!h)return;
+  const m=h.match(/from=([^&]+)&to=([^&]+)/);if(!m)return;
+  const f=decodeURIComponent(m[1]),t=decodeURIComponent(m[2]);
+  if(!U2G[f]||!U2G[t])return;
+  curU=f;tgtU=t;
+  const fg=U2G[f],tg=U2G[t];
+  let type=fg===tg?(f===t?'same':'free'):tg>fg?'report':'permit';
+  const pl=location.href;
+  lastResult={fg,tg,type,pl,curU:f,tgtU:t};
+  buildResult(fg,tg,type,pl);
+  renderMobTab(lastResult);
+  setSt(3,true);
+  goTab('tr',document.getElementById('tabR'));
+}
+
+// ─────────────────────────────────────────
+//  PWA — 설치 배너 + iOS 가이드 + SW 등록
+// ─────────────────────────────────────────
+let deferredPrompt = null;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+const isInStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+const DISMISS_KEY = 'pwa-banner-dismissed';
+
+// 헤더 설치 버튼 (기존)
+const pwaBtn = document.getElementById('pwaBtn');
+
+// Android / 데스크탑: beforeinstallprompt 이벤트
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // 이전에 닫지 않은 경우에만 배너 표시
+  if (!sessionStorage.getItem(DISMISS_KEY)) {
+    setTimeout(() => showPwaBanner(), 1500);
+  }
+  // 헤더 버튼도 표시
+  if (pwaBtn) pwaBtn.style.display = 'block';
+});
+
+// iOS: standalone 아닌 Safari일 때 배너 표시
+if (isIOS && !isInStandalone && !sessionStorage.getItem(DISMISS_KEY)) {
+  setTimeout(() => showIosBanner(), 2000);
+}
+
+// 설치 완료 시 배너 숨김
+window.addEventListener('appinstalled', () => {
+  hidePwaBanner();
+  if (pwaBtn) pwaBtn.style.display = 'none';
+  toast('앱이 설치되었습니다 ✓');
+});
+
+function showPwaBanner() {
+  const banner = document.getElementById('pwaBanner');
+  if (banner) banner.classList.add('show');
+}
+function hidePwaBanner() {
+  const banner = document.getElementById('pwaBanner');
+  if (banner) banner.classList.remove('show');
+}
+function showIosBanner() {
+  const modal = document.getElementById('iosGuideModal');
+  if (modal) modal.classList.add('show');
+}
+function closeIosGuide() {
+  const modal = document.getElementById('iosGuideModal');
+  if (modal) modal.classList.remove('show');
+  sessionStorage.setItem(DISMISS_KEY, '1');
+}
+
+// 설치하기 버튼
+const installBtn = document.getElementById('pwaInstallBtn');
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      hidePwaBanner();
+      if (pwaBtn) pwaBtn.style.display = 'none';
+    }
+    deferredPrompt = null;
+  });
+}
+
+// 나중에 버튼
+const dismissBtn = document.getElementById('pwaDismissBtn');
+if (dismissBtn) {
+  dismissBtn.addEventListener('click', () => {
+    hidePwaBanner();
+    sessionStorage.setItem(DISMISS_KEY, '1');
+  });
+}
+
+// 헤더 설치 버튼 (기존 동작 유지)
+if (pwaBtn) {
+  pwaBtn.addEventListener('click', async () => {
+    if (isIOS) { showIosBanner(); return; }
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      pwaBtn.style.display = 'none';
+    }
+    deferredPrompt = null;
+  });
+}
+
+// Service Worker 등록
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(reg => console.log('[SW] 등록 완료:', reg.scope))
+      .catch(err => console.warn('[SW] 등록 실패:', err));
+  });
+}
+
+// ─────────────────────────────────────────
+//  초기화
+// ─────────────────────────────────────────
+mkGrid('gCur',selCur,false);
+mkGrid('gTgt',(u,g,b)=>{},true);
+buildRefTable();
+fromHash();
+</script>
+
+<!-- ── PWA 설치 배너 (Android/데스크탑) ── -->
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-banner-icon">
+    <img src="icons/icon-192x192.png" alt="앱 아이콘">
+  </div>
+  <div class="pwa-banner-text">
+    <div class="pwa-banner-title">📲 앱으로 설치하기</div>
+    <div class="pwa-banner-desc">홈 화면에 추가하면 오프라인에서도 바로 사용 가능합니다</div>
+  </div>
+  <div class="pwa-banner-btns">
+    <button class="pwa-install-btn" id="pwaInstallBtn">설치하기</button>
+    <button class="pwa-dismiss-btn" id="pwaDismissBtn">나중에</button>
+  </div>
+</div>
+
+<!-- ── iOS 설치 안내 모달 ── -->
+<div class="ios-guide-modal" id="iosGuideModal">
+  <div class="ios-guide-header">
+    <div class="ios-guide-title">📲 홈 화면에 추가하는 방법</div>
+    <button class="ios-guide-close" onclick="closeIosGuide()">✕</button>
+  </div>
+  <div class="ios-steps">
+    <div class="ios-step">
+      <div class="ios-step-num">1</div>
+      <div class="ios-step-text">Safari 하단의 <strong>공유 버튼</strong> (□↑) 을 탭하세요</div>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">2</div>
+      <div class="ios-step-text">스크롤해서 <strong>홈 화면에 추가</strong>를 탭하세요</div>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">3</div>
+      <div class="ios-step-text">이름 확인 후 오른쪽 상단 <strong>추가</strong>를 탭하면 완료!</div>
+    </div>
+  </div>
+  <div class="ios-arrow">홈 화면에서 오프라인으로도 사용 가능합니다 ✓</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</body>
+</html>
