@@ -6,18 +6,19 @@
 <meta name="theme-color" content="#4a8cf5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="용도변경판정">
+<meta name="apple-mobile-web-app-title" content="용도변경">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="용도변경판정">
+<meta name="application-name" content="용도변경">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+<link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
 <link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144x144.png">
-<link rel="shortcut icon" href="icons/favicon.ico">
+
 <meta name="description" content="건축법 제19조 기준 건축물 용도변경 가능 여부 자동 판정 — MANMIN-Ver.1">
-<title>건축물 용도변경 판정기 [MANMIN-Ver.1]</title>
+<title>용도변경 — 건축물 용도변경 판정기 [MANMIN-Ver.1]</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
@@ -948,6 +949,47 @@ body::before{
     gap: 4pt;
   }
 }
+
+/* ── PWA 설치 버튼 강화 스타일 ── */
+.pwa-btn{
+  font-size:11px;padding:6px 14px;border-radius:var(--rsm);
+  background:linear-gradient(135deg,var(--blue),#5ba4ff);
+  border:none;
+  color:#fff;cursor:pointer;
+  font-family:var(--font);font-weight:600;
+  transition:all .2s;white-space:nowrap;
+  display:none;  /* beforeinstallprompt 후 표시 */
+  box-shadow:0 2px 12px rgba(74,140,245,.4);
+  animation:pwa-pulse 2.5s ease-in-out infinite;
+}
+.pwa-btn:hover{
+  background:linear-gradient(135deg,#5ba4ff,var(--blue));
+  transform:translateY(-1px);
+  box-shadow:0 4px 18px rgba(74,140,245,.55);
+  animation:none;
+}
+@keyframes pwa-pulse{
+  0%,100%{box-shadow:0 2px 12px rgba(74,140,245,.4);}
+  50%{box-shadow:0 2px 20px rgba(74,140,245,.7),0 0 8px rgba(74,140,245,.3);}
+}
+
+/* ── SW 업데이트 배너 ── */
+.sw-update-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:linear-gradient(135deg,#0d1b35,#111420);
+  border-top:1px solid var(--bbd);
+  color:var(--t1);padding:13px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  font-size:12px;font-weight:600;
+  box-shadow:0 -4px 20px rgba(0,0,0,.5);
+}
+.sw-update-bar button{
+  background:var(--blue);border:none;color:#fff;
+  padding:7px 16px;border-radius:var(--rsm);
+  cursor:pointer;font-weight:700;font-size:11px;
+  font-family:var(--font);
+}
+
 </style>
 </head>
 <body>
@@ -958,8 +1000,11 @@ body::before{
   <div class="hinner">
     <div>
       <div class="hlogo">
-        <div class="logo-mark">MM</div>
-        <div><div class="hseries">// MANMIN Web Series — Use Change</div></div>
+        <div class="logo-mark" style="background:none;border:none;padding:0;overflow:hidden;width:42px;height:42px;border-radius:9px;flex-shrink:0;">
+          <img src="icons/brand-icon.jpg" alt="용도변경 로고"
+               style="width:42px;height:42px;object-fit:cover;border-radius:9px;display:block;" />
+        </div>
+        <div><div class="hseries">// 용도변경 · MANMIN Web Series</div></div>
       </div>
       <h1 class="htitle">건축물 <em>용도변경</em> 판정기 <span style="font-size:clamp(.65rem,1.8vw,.85rem);font-family:var(--mono);font-weight:500;color:var(--blue);opacity:.85;letter-spacing:.06em;vertical-align:middle;margin-left:6px">MANMIN-Ver.1</span></h1>
       <p class="hsub">건축법 제19조 · 시행령 제14조 기준 자동 판정 시스템</p>
@@ -1905,7 +1950,7 @@ buildRefTable();
 <!-- ── PWA 설치 배너 (Android/데스크탑) ── -->
 <div class="pwa-banner" id="pwaBanner">
   <div class="pwa-banner-icon">
-    <img src="icons/icon-192x192.png" alt="앱 아이콘">
+    <img src="icons/brand-icon.jpg" alt="용도변경 앱 아이콘">
   </div>
   <div class="pwa-banner-text">
     <div class="pwa-banner-title">📲 앱으로 설치하기</div>
@@ -1941,6 +1986,42 @@ buildRefTable();
 </div>
 
 <div class="toast" id="toast"></div>
+
+
+<script>
+/* ── Service Worker 등록 & 업데이트 배너 ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      console.log('[SW] 등록:', reg.scope);
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            const bar = document.createElement('div');
+            bar.className = 'sw-update-bar';
+            const sp = document.createElement('span');
+            sp.textContent = '🔄 새 버전이 준비되었습니다!';
+            const btn = document.createElement('button');
+            btn.textContent = '지금 업데이트';
+            btn.onclick = () => {
+              navigator.serviceWorker.ready.then(r => {
+                if (r.waiting) r.waiting.postMessage({ type: 'SKIP_WAITING' });
+              });
+              bar.remove();
+              location.reload();
+            };
+            bar.appendChild(sp);
+            bar.appendChild(btn);
+            document.body.appendChild(bar);
+          }
+        });
+      });
+    }).catch(e => console.warn('[SW] 등록 실패:', e));
+  });
+}
+</script>
 
 </body>
 </html>
