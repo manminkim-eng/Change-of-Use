@@ -1786,103 +1786,113 @@ function buildRefTable(){
 
 // ─────────────────────────────────────────
 //  PWA — 설치 배너 + iOS 가이드 + SW 등록
+//  ※ window load 후 실행: 배너 DOM 보장
 // ─────────────────────────────────────────
-let deferredPrompt = null;
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-const isInStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-const DISMISS_KEY = 'pwa-banner-dismissed';
+window.addEventListener('load', () => {
 
-// 헤더 설치 버튼 (기존)
-const pwaBtn = document.getElementById('pwaBtn');
-
-// Android / 데스크탑: beforeinstallprompt 이벤트
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  // 이전에 닫지 않은 경우에만 배너 표시
-  if (!sessionStorage.getItem(DISMISS_KEY)) {
-    setTimeout(() => showPwaBanner(), 1500);
+  /* Service Worker 등록 */
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js', {scope: './'})
+      .then(r => console.log('[SW] 등록:', r.scope))
+      .catch(e => console.warn('[SW] 실패:', e));
   }
-  // 헤더 버튼도 표시
-  if (pwaBtn) pwaBtn.style.display = 'block';
-});
 
-// iOS: standalone 아닌 Safari일 때 배너 표시
-if (isIOS && !isInStandalone && !sessionStorage.getItem(DISMISS_KEY)) {
-  setTimeout(() => showIosBanner(), 2000);
-}
+  const DISMISS_KEY = 'pwa-banner-dismissed';
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.navigator.standalone ||
+                       window.matchMedia('(display-mode: standalone)').matches;
 
-// 설치 완료 시 배너 숨김
-window.addEventListener('appinstalled', () => {
-  hidePwaBanner();
-  if (pwaBtn) pwaBtn.style.display = 'none';
-  toast('앱이 설치되었습니다 ✓');
-});
+  let deferredPrompt = null;
 
-function showPwaBanner() {
-  const banner = document.getElementById('pwaBanner');
-  if (banner) banner.classList.add('show');
-}
-function hidePwaBanner() {
-  const banner = document.getElementById('pwaBanner');
-  if (banner) banner.classList.remove('show');
-}
-function showIosBanner() {
-  const modal = document.getElementById('iosGuideModal');
-  if (modal) modal.classList.add('show');
-}
-function closeIosGuide() {
-  const modal = document.getElementById('iosGuideModal');
-  if (modal) modal.classList.remove('show');
-  sessionStorage.setItem(DISMISS_KEY, '1');
-}
+  /* ── DOM 요소 ── */
+  const pwaBtn      = document.getElementById('pwaBtn');
+  const pwaBanner   = document.getElementById('pwaBanner');
+  const installBtn  = document.getElementById('pwaInstallBtn');
+  const dismissBtn  = document.getElementById('pwaDismissBtn');
+  const iosModal    = document.getElementById('iosGuideModal');
 
-// 설치하기 버튼
-const installBtn = document.getElementById('pwaInstallBtn');
-if (installBtn) {
-  installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      hidePwaBanner();
-      if (pwaBtn) pwaBtn.style.display = 'none';
-    }
-    deferredPrompt = null;
-  });
-}
+  /* ── 헬퍼 ── */
+  const showBanner = () => { if (pwaBanner) pwaBanner.classList.add('show'); };
+  const hideBanner = () => { if (pwaBanner) pwaBanner.classList.remove('show'); };
 
-// 나중에 버튼
-const dismissBtn = document.getElementById('pwaDismissBtn');
-if (dismissBtn) {
-  dismissBtn.addEventListener('click', () => {
-    hidePwaBanner();
+  window.closeIosGuide = () => {
+    if (iosModal) iosModal.classList.remove('show');
     sessionStorage.setItem(DISMISS_KEY, '1');
-  });
-}
+  };
 
-// 헤더 설치 버튼 (기존 동작 유지)
-if (pwaBtn) {
-  pwaBtn.addEventListener('click', async () => {
-    if (isIOS) { showIosBanner(); return; }
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      pwaBtn.style.display = 'none';
+  /* ── Android / 데스크탑: beforeinstallprompt ── */
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (pwaBtn) pwaBtn.style.display = 'block';
+    if (!sessionStorage.getItem(DISMISS_KEY)) {
+      setTimeout(showBanner, 1200);
     }
-    deferredPrompt = null;
   });
-}
 
-// Service Worker 등록
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js', { scope: './' })
-      .then(reg => console.log('[SW] 등록 완료:', reg.scope))
-      .catch(err => console.warn('[SW] 등록 실패:', err));
+  /* ── 설치 완료 ── */
+  window.addEventListener('appinstalled', () => {
+    hideBanner();
+    if (pwaBtn) pwaBtn.style.display = 'none';
+    toast('앱이 설치되었습니다 ✓');
   });
-}
+
+  /* ── 배너 설치하기 버튼 ── */
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      hideBanner();
+      if (!deferredPrompt) return;
+      try {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          if (pwaBtn) pwaBtn.style.display = 'none';
+          toast('설치 중입니다...');
+        }
+      } catch(e) { console.warn('설치 실패:', e); }
+      deferredPrompt = null;
+    });
+  }
+
+  /* ── 배너 나중에 버튼 ── */
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', () => {
+      hideBanner();
+      sessionStorage.setItem(DISMISS_KEY, '1');
+    });
+  }
+
+  /* ── 헤더 📲 앱 설치 버튼 ── */
+  if (pwaBtn) {
+    pwaBtn.addEventListener('click', async () => {
+      if (isIOS) {
+        if (iosModal) iosModal.classList.add('show');
+        return;
+      }
+      if (!deferredPrompt) {
+        toast('이미 설치됐거나 이 브라우저는 자동 설치를 지원하지 않습니다');
+        return;
+      }
+      hideBanner();
+      try {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          pwaBtn.style.display = 'none';
+          toast('설치 중입니다...');
+        }
+      } catch(e) { console.warn('설치 실패:', e); }
+      deferredPrompt = null;
+    });
+  }
+
+  /* ── iOS: Safari에서 비standalone일 때 ── */
+  if (isIOS && !isStandalone && !sessionStorage.getItem(DISMISS_KEY)) {
+    if (pwaBtn) pwaBtn.style.display = 'block';
+    setTimeout(() => { if (iosModal) iosModal.classList.add('show'); }, 2500);
+  }
+
+}); /* end window load */
 
 // ─────────────────────────────────────────
 //  초기화
