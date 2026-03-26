@@ -21,6 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 /* ═══════════════════════════════════════
    MANMIN Design System Ver.1
@@ -338,24 +339,7 @@ body::before{
 .wl{list-style:none;display:flex;flex-direction:column;gap:4px}
 .wl li{font-size:12px;color:var(--t2);padding-left:12px;position:relative;line-height:1.5}
 .wl li::before{content:'·';position:absolute;left:3px;color:var(--t3)}
-.plcard{background:var(--bg3);border:1px solid var(--bd1);border-radius:var(--rmd);padding:1.1rem 1.25rem;margin-top:1rem}
-.pltop{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}
-.plttl{font-size:13px;font-weight:500;color:var(--t1)}
-.plsub{font-size:11px;color:var(--t3);margin-top:1px}
-.plrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.plurl{
-  flex:1;min-width:200px;background:var(--bg1);border:1px solid var(--bd1);
-  border-radius:var(--rsm);padding:.55rem .875rem;font-family:var(--mono);
-  font-size:11px;color:var(--blue);overflow:hidden;text-overflow:ellipsis;
-  white-space:nowrap;cursor:pointer;user-select:all;
-}
-.cpbtn{
-  padding:.55rem 1rem;border-radius:var(--rsm);background:var(--bbg);
-  border:1px solid var(--bbd);color:var(--blue);font-size:12px;
-  font-family:var(--font);cursor:pointer;white-space:nowrap;transition:all .14s;flex-shrink:0;
-}
-.cpbtn:hover{background:rgba(74,140,245,.15)}
-.cpbtn.copied{color:var(--green);background:var(--gbg);border-color:var(--gbd)}
+
 .outbtns{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
 .obtn{
   flex:1;min-width:140px;padding:.7rem 1rem;
@@ -460,14 +444,28 @@ body::before{
 .mobftr{text-align:center;padding:14px 0 8px;border-top:1px solid rgba(255,255,255,.05);margin-top:14px;font-family:var(--mono);font-size:9px;color:#50596e}
 .mobftr span{color:#4a8cf5}
 
-/* 모바일 탭 공유버튼 */
-.mob-share-btn{
-  margin-top:1rem;padding:.65rem 2rem;
-  background:var(--bbg);border:1px solid var(--bbd);
-  border-radius:var(--rmd);color:var(--blue);font-size:13px;
-  font-family:var(--font);cursor:pointer;transition:all .14s;
+/* 모바일 탭 버튼 행 */
+.mob-action-row{
+  display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap;
 }
-.mob-share-btn:hover{background:rgba(74,140,245,.15)}
+.mob-jpg-btn{
+  flex:1;min-width:140px;padding:.7rem 1rem;
+  background:var(--blue);color:#fff;
+  border:none;border-radius:var(--rmd);
+  font-size:13px;font-weight:500;font-family:var(--font);
+  cursor:pointer;transition:background .14s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.mob-jpg-btn:hover{background:var(--blue2);}
+.mob-share-btn{
+  flex:1;min-width:120px;padding:.7rem 1rem;
+  background:var(--bg3);color:var(--t2);
+  border:1px solid var(--bd1);border-radius:var(--rmd);
+  font-size:13px;font-family:var(--font);
+  cursor:pointer;transition:all .14s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.mob-share-btn:hover{border-color:var(--bbd);color:var(--blue);}
 
 /* ── 참고 테이블 ── */
 .ref-table{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -687,7 +685,6 @@ body::before{
   .fab,
   .toast,
   .outbtns,
-  .plcard,
   .breset,
   .bjudge,
   .modal-overlay,
@@ -1115,14 +1112,14 @@ body::before{
           <div class="howto-num">4</div>
           <div class="howto-content">
             <div class="howto-title">판정 결과 확인</div>
-            <div class="howto-desc">「📊 판정 결과」 탭에서 상세 결과와 행정 절차, 주의사항을 확인하세요. 고유 판정 링크로 공유·북마크가 가능합니다.</div>
+            <div class="howto-desc">「📊 판정 결과」 탭에서 상세 결과와 행정 절차, 주의사항을 확인하세요.</div>
           </div>
         </div>
         <div class="howto-step">
           <div class="howto-num">5</div>
           <div class="howto-content">
             <div class="howto-title">모바일 출력 미리보기</div>
-            <div class="howto-desc">「📱 모바일 미리보기」 탭에서 <strong>갤럭시 S24 Ultra</strong> 규격 화면으로 판정서를 확인하고 링크를 공유할 수 있습니다.</div>
+            <div class="howto-desc">「📱 모바일 미리보기」 탭에서 <strong>갤럭시 S24 Ultra</strong> 규격 화면으로 판정서를 확인하고 <strong>JPG 저장</strong> 및 <strong>공유하기</strong>를 사용할 수 있습니다.</div>
           </div>
         </div>
         <div class="howto-step">
@@ -1374,11 +1371,8 @@ function doJudge(){
   if(!curU||!tgtU)return;
   const fg=U2G[curU],tg=U2G[tgtU];
   let type=fg===tg?(curU===tgtU?'same':'free'):tg>fg?'report':'permit';
-  const hash=`#from=${encodeURIComponent(curU)}&to=${encodeURIComponent(tgtU)}`;
-  const pl=location.href.split('#')[0]+hash;
-  history.replaceState(null,'',hash);
-  lastResult={fg,tg,type,pl,curU,tgtU};
-  buildResult(fg,tg,type,pl);
+  lastResult={fg,tg,type,curU,tgtU};
+  buildResult(fg,tg,type);
   renderMobTab(lastResult);
   setSt(3,true);
   goTab('tr',document.getElementById('tabR'));
@@ -1388,7 +1382,7 @@ function doJudge(){
 // ─────────────────────────────────────────
 //  판정 결과 (데스크탑 탭)
 // ─────────────────────────────────────────
-function buildResult(fg,tg,type,pl){
+function buildResult(fg,tg,type){
   const DATE=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
   const T={
     free:{cls:'vf',ic:'📋',kw:'REGISTER REQUIRED',hl:'건축물대장 변경신청 필요'},
@@ -1508,14 +1502,9 @@ function buildResult(fg,tg,type,pl){
     html+=`<div class="wbox"><div class="wt">⚠ 주의사항 및 추가 검토 사항</div><ul class="wl">${warn.map(w=>`<li>${w}</li>`).join('')}</ul></div>`;
   }
   html+=`${printFooter}
-  <div class="plcard">
-    <div class="pltop"><span>🔗</span><div><div class="plttl">고유 판정 링크 생성됨</div><div class="plsub">이 URL로 현재 판정 결과를 공유·북마크할 수 있습니다</div></div></div>
-    <div class="plrow"><div class="plurl" id="plUrl" onclick="cpLink()">${pl}</div><button class="cpbtn" id="cpBtn" onclick="cpLink()">링크 복사</button></div>
-  </div>
   <div class="outbtns">
     <button class="obtn po" onclick="goTab('tmob',document.getElementById('tabMob'))">📱 모바일 미리보기</button>
     <button class="obtn" onclick="window.print()">🖨 A4 인쇄 / PDF</button>
-    <button class="obtn" onclick="cpLink()">🔗 링크 복사</button>
   </div>
   </div>`;
 
@@ -1527,7 +1516,7 @@ function buildResult(fg,tg,type,pl){
 //  갤럭시 S24 Ultra (412×915 dp)
 // ─────────────────────────────────────────
 function renderMobTab(r){
-  const {fg,tg,type,pl}=r;
+  const {fg,tg,type}=r;
   const CU=r.curU,TU=r.tgtU;
   const DATE=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
   const TIME=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
@@ -1611,10 +1600,6 @@ function renderMobTab(r){
             <div class="mobwt">⚠ 주의사항</div>
             ${warns.map(w=>`<div class="mobwi">${w}</div>`).join('')}
           </div>`:''}
-          <div class="mobpl">
-            <div class="mobpll">🔗 고유 판정 링크</div>
-            <div class="mobplu">${pl}</div>
-          </div>
           <div class="mobsec" style="margin-top:16px">법령 근거</div>
           <div style="font-size:10px;color:#8892aa;line-height:1.6">건축법 제19조(용도변경) · 건축법 시행령 제14조 · 9개 시설군 기준</div>
           <div class="mobftr">
@@ -1626,7 +1611,10 @@ function renderMobTab(r){
       <!-- 홈 인디케이터 -->
       <div class="mob-homeind"><div class="mob-homeind-bar"></div></div>
     </div>
-    <button class="mob-share-btn" onclick="cpLinkMob('${pl}')">🔗 판정 링크 복사</button>
+    <div class="mob-action-row">
+      <button class="mob-jpg-btn" onclick="saveMobJpg()">🖼 JPG 저장</button>
+      <button class="mob-share-btn" id="mobShareBtn" onclick="shareMobResult()">↑ 공유하기</button>
+    </div>
   </div>`;
 
   document.getElementById('mobTabArea').innerHTML=mobHTML;
@@ -1655,23 +1643,114 @@ function goMtab(id,btn){
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
 // ─────────────────────────────────────────
-//  링크 복사
+//  JPG 저장 (html2canvas)
 // ─────────────────────────────────────────
-function cpLink(){
-  const url=document.getElementById('plUrl')?.textContent;if(!url)return;
-  _copy(url,()=>{
-    const b=document.getElementById('cpBtn');
-    if(b){b.textContent='✓ 복사됨';b.classList.add('copied');setTimeout(()=>{b.textContent='링크 복사';b.classList.remove('copied')},2000);}
+function saveMobJpg(){
+  const frame = document.querySelector('#mobTabArea .mob-rpt');
+  if(!frame){ toast('판정 결과가 없습니다'); return; }
+
+  const btn = document.querySelector('.mob-jpg-btn');
+  const orig = btn.textContent;
+  btn.textContent = '생성 중...';
+  btn.disabled = true;
+
+  /* 캡처용 임시 컨테이너: 전체 내용 펼침 */
+  const clone = frame.cloneNode(true);
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = [
+    'position:fixed','top:-9999px','left:-9999px',
+    'width:412px','background:#0b0e17',
+    'font-family:"Noto Sans KR",sans-serif',
+    'padding:0','margin:0','z-index:-1'
+  ].join(';');
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  html2canvas(wrapper, {
+    scale: 3,
+    useCORS: true,
+    backgroundColor: '#0b0e17',
+    logging: false,
+    width: 412,
+    windowWidth: 412
+  }).then(canvas => {
+    document.body.removeChild(wrapper);
+    btn.textContent = orig;
+    btn.disabled = false;
+
+    const link = document.createElement('a');
+    const DATE = new Date().toLocaleDateString('ko-KR',{year:'2-digit',month:'2-digit',day:'2-digit'}).replace(/\./g,'').replace(/ /g,'');
+    link.download = `용도변경판정_${lastResult?.curU||''}_${lastResult?.tgtU||''}_${DATE}.jpg`;
+    link.href = canvas.toDataURL('image/jpeg', 0.92);
+    link.click();
+    toast('JPG 저장 완료 ✓');
+  }).catch(err => {
+    document.body.removeChild(wrapper);
+    btn.textContent = orig;
+    btn.disabled = false;
+    console.error(err);
+    toast('저장 실패 — 브라우저 권한을 확인하세요');
   });
 }
-function cpLinkMob(url){_copy(url,()=>toast('링크가 클립보드에 복사됐습니다'));}
-function _copy(url,cb){
-  navigator.clipboard.writeText(url).then(cb).catch(()=>{
-    const t=document.createElement('textarea');t.value=url;
-    document.body.appendChild(t);t.select();document.execCommand('copy');
-    document.body.removeChild(t);cb();
-  });
-  toast('링크가 클립보드에 복사됐습니다');
+
+// ─────────────────────────────────────────
+//  공유하기 (Web Share API)
+// ─────────────────────────────────────────
+async function shareMobResult(){
+  const frame = document.querySelector('#mobTabArea .mob-rpt');
+  if(!frame){ toast('판정 결과가 없습니다'); return; }
+
+  const shareBtn = document.getElementById('mobShareBtn');
+
+  /* Web Share API + 이미지 공유 지원 여부 확인 */
+  if(navigator.share && navigator.canShare){
+    const clone = frame.cloneNode(true);
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:412px;background:#0b0e17;font-family:"Noto Sans KR",sans-serif;z-index:-1;';
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+
+    const orig = shareBtn.textContent;
+    shareBtn.textContent = '준비 중...';
+
+    try {
+      const canvas = await html2canvas(wrapper, {
+        scale: 3, useCORS: true, backgroundColor: '#0b0e17', logging: false, width: 412, windowWidth: 412
+      });
+      document.body.removeChild(wrapper);
+
+      canvas.toBlob(async blob => {
+        const file = new File([blob], '용도변경판정.jpg', {type:'image/jpeg'});
+        const shareData = {
+          title: '건축물 용도변경 판정 결과',
+          text: `${lastResult?.curU||''} → ${lastResult?.tgtU||''} 용도변경 판정 결과 (MANMIN-Ver.1)`,
+          files: [file]
+        };
+        if(navigator.canShare(shareData)){
+          await navigator.share(shareData);
+          toast('공유 완료');
+        } else {
+          /* 파일 공유 미지원 시 텍스트만 공유 */
+          await navigator.share({title:shareData.title, text:shareData.text});
+          toast('공유 완료');
+        }
+        shareBtn.textContent = orig;
+      }, 'image/jpeg', 0.92);
+    } catch(e){
+      document.body.removeChild(wrapper);
+      shareBtn.textContent = orig;
+      if(e.name !== 'AbortError') toast('공유 실패');
+    }
+  } else {
+    /* Web Share API 미지원 — 텍스트 클립보드 복사 */
+    const text = `[건축물 용도변경 판정 — MANMIN-Ver.1]\n현재 용도: ${lastResult?.curU||''}\n변경 용도: ${lastResult?.tgtU||''}\n판정: ${document.querySelector('.vhl')?.textContent||''}\n건축법 제19조 기준`;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('판정 정보가 클립보드에 복사됐습니다');
+    } catch {
+      toast('이 브라우저는 공유를 지원하지 않습니다');
+    }
+  }
 }
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
@@ -1687,7 +1766,7 @@ function doReset(){
   document.getElementById('rArea').innerHTML='<div class="empty-result"><div class="ei">⚖</div><p>판정 탭에서 현재·변경 용도를 선택한 후<br>판정 버튼을 눌러주세요.</p></div>';
   document.getElementById('mobTabArea').innerHTML='<div class="mob-empty"><div class="ei">📱</div><p>판정 탭에서 용도변경 판정을 먼저 실행해주세요.<br><br>판정 완료 후 이 탭에서<br><strong style="color:var(--t1)">갤럭시 S24 Ultra 규격</strong> 모바일 화면으로<br>판정서를 미리 확인할 수 있습니다.</p></div>';
   const s2=document.getElementById('s2card');s2.style.opacity='.38';s2.style.pointerEvents='none';
-  setSt(1);history.replaceState(null,'',location.pathname);
+  setSt(1);
   goTab('tj',document.querySelectorAll('.tab-btn')[0]);
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -1703,25 +1782,6 @@ function buildRefTable(){
     <td style="color:${g.c};font-weight:500;font-size:12px">${g.n}</td>
     <td style="font-size:12px">${g.u.join(', ')}</td>
   </tr>`).join('')}</tbody>`;
-}
-
-// ─────────────────────────────────────────
-//  URL 해시 복원
-// ─────────────────────────────────────────
-function fromHash(){
-  const h=location.hash;if(!h)return;
-  const m=h.match(/from=([^&]+)&to=([^&]+)/);if(!m)return;
-  const f=decodeURIComponent(m[1]),t=decodeURIComponent(m[2]);
-  if(!U2G[f]||!U2G[t])return;
-  curU=f;tgtU=t;
-  const fg=U2G[f],tg=U2G[t];
-  let type=fg===tg?(f===t?'same':'free'):tg>fg?'report':'permit';
-  const pl=location.href;
-  lastResult={fg,tg,type,pl,curU:f,tgtU:t};
-  buildResult(fg,tg,type,pl);
-  renderMobTab(lastResult);
-  setSt(3,true);
-  goTab('tr',document.getElementById('tabR'));
 }
 
 // ─────────────────────────────────────────
@@ -1830,7 +1890,6 @@ if ('serviceWorker' in navigator) {
 mkGrid('gCur',selCur,false);
 mkGrid('gTgt',(u,g,b)=>{},true);
 buildRefTable();
-fromHash();
 </script>
 
 <!-- ── PWA 설치 배너 (Android/데스크탑) ── -->
