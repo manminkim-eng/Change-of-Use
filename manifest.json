@@ -1,5 +1,5 @@
 {
-  "name": "MANMIN 건축 · 건축물 용도변경 판정기",
+  "name": "MANMIN 용도변경",
   "short_name": "용도변경",
   "description": "건축법 제19조·시행령 제14조 기준 시설군 9군 분류 · 허가/신고/건축물대장 변경 자동 판정 · A4 판정서 — MANMIN Ver-5.0 | ARCHITECT KIM MANMIN",
   "start_url": "./index.html",
