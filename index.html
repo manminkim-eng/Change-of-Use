@@ -554,7 +554,11 @@ body{font-size:14px;}
 .bgn{color:#94a3b8;}
 .sel-box{background:#f8fafd;border-color:#dde3ed;} .slabel{color:#64748b;} .sval{color:#94a3b8;} .sval.vc{color:#785a28;font-weight:700;} .sval.vt{color:#b45309;font-weight:700;} .sarrow{color:#94a3b8;}
 .bjudge{background:linear-gradient(135deg,#785a28,#8f6b2e);font-weight:700;box-shadow:0 4px 14px rgba(120,90,40,.28);} .bjudge:hover{background:linear-gradient(135deg,#5c4420,#785a28);}
-.bjudge:disabled{background:#e4e9f0;color:#94a3b8;box-shadow:none;}
+.bjudge:disabled{background:#e4e9f0;color:#64748b;box-shadow:none;}
+/* v5.0.15 2026-11-01 — 화면 연한 글자색 보강(작업지시서 §25-6-29): 시설군 제목(제1군 ~ 제9군) · 시설군 참고 표 군 이름이 밝은 색 · 반투명이라 흰 바탕에서 대비 1.4 ~ 2.3 →
+   진한 남색 글자 + 왼쪽 군 색 막대, 단추 안 「제N군」 · 선택 대기 · 단계 표시 · 입력란 안내글 · 비활성 판정 단추 글자 진하게(대비 4.5 이상), 2단계 대기 흐림 38% → 60% */
+.fgt{color:#334155;font-weight:700;letter-spacing:.06em;border-left:3px solid var(--gc,#94a3b8);padding-left:8px;line-height:1.35}
+.bgn{color:#475569;font-weight:600;} .sval{color:#64748b;} .sarrow{color:#64748b;} .slbl{color:#4b5563;} .mm-inp::placeholder{color:#6b7280;}
 .breset{background:#fff;border:1.5px solid #dde3ed;color:#475569;} .breset:hover{border-color:#94a3b8;color:#1a2744;background:#f8fafd;}
 .verdict{background:#fff;} .vf{background:#fbf6ea;border-color:#f1cd7c;} .vr{background:#fffbeb;border-color:#fde68a;} .vp{background:#fff7ed;border-color:#fed7aa;}
 .vf .vkw{color:#785a28;} .vr .vkw{color:#b45309;} .vp .vkw{color:#c2410c;}
@@ -817,7 +821,7 @@ footer.mm-foot{align-self:stretch;width:100%;box-sizing:border-box}   /* 이 도
     <div class="chead">STEP 01 — 현재 건축물 용도 선택</div>
     <div id="gCur"></div>
   </div>
-  <div class="card" id="s2card" style="opacity:.38;pointer-events:none;transition:opacity .3s">
+  <div class="card" id="s2card" style="opacity:.6;pointer-events:none;transition:opacity .3s">
     <div class="chead">STEP 02 — 변경하려는 용도 선택</div>
     <div class="sel-bar">
       <div class="sel-box"><div class="slabel">CURRENT — 현재 용도</div><div class="sval" id="dCur">선택 대기 중</div></div>
@@ -1169,7 +1173,7 @@ function mkGrid(cid,fn,isTgt){
   const box=document.getElementById(cid);box.innerHTML='';
   GRP.forEach(g=>{
     const gd=document.createElement('div');gd.className='fac-group';
-    gd.innerHTML=`<div class="fgt" style="color:${g.c}99">제${g.g}군 — ${g.n}</div>`;
+    gd.innerHTML=`<div class="fgt" style="--gc:${g.c}">제${g.g}군 — ${g.n}</div>`;
     const grid=document.createElement('div');grid.className='fac-grid';
     g.u.forEach(u=>{
       const b=document.createElement('button');b.className='fb';
@@ -1609,7 +1613,7 @@ function doReset(){
   document.getElementById('jBtn').disabled=true;
   document.getElementById('rArea').innerHTML='<div class="empty-result"><div class="ei">⚖</div><p>판정 탭에서 현재·변경 용도를 선택한 후<br>판정 버튼을 눌러주세요.</p></div>';
   document.getElementById('mobTabArea').innerHTML='<div class="mob-empty"><div class="ei">📱</div><p>판정 탭에서 용도변경 판정을 먼저 실행해주세요.<br><br>판정 완료 후 이 탭에서<br><strong style="color:var(--t1)">갤럭시 S24 Ultra 규격</strong> 모바일 화면으로<br>판정서를 미리 확인할 수 있습니다.</p></div>';
-  const s2=document.getElementById('s2card');s2.style.opacity='.38';s2.style.pointerEvents='none';
+  const s2=document.getElementById('s2card');s2.style.opacity='.6';s2.style.pointerEvents='none';
   setSt(1);
   goTab('tj',document.querySelectorAll('.tab-btn')[0]);
   window.scrollTo({top:0,behavior:'smooth'});
@@ -1623,7 +1627,7 @@ function buildRefTable(){
   t.innerHTML=`<thead><tr><th>시설군</th><th>군 명칭</th><th>포함 용도</th></tr></thead>
   <tbody>${GRP.map(g=>`<tr>
     <td><span class="gtag">제${g.g}군</span></td>
-    <td style="color:${g.c};font-weight:500;font-size:12px">${g.n}</td>
+    <td style="color:#334155;font-weight:700;font-size:12px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${g.c};margin-right:6px;vertical-align:1px"></span>${g.n}</td>
     <td style="font-size:12px">${g.u.join(', ')}</td>
   </tr>`).join('')}</tbody>`;
 }
@@ -1772,7 +1776,7 @@ window.doReset=function(){
   if(dc){ dc.textContent='선택 대기 중'; dc.className='sval'; } if(dt){ dt.textContent='선택 대기 중'; dt.className='sval'; }
   var jb=document.getElementById('jBtn'); if(jb) jb.disabled=true;
   var ra=document.getElementById('rArea'); if(ra) ra.innerHTML='<div class="empty-result"><div class="ei">⚖</div><p>판정 탭에서 현재·변경 용도를 선택한 후<br>판정 버튼을 눌러주세요.</p></div>';
-  var s2=document.getElementById('s2card'); if(s2){ s2.style.opacity='.38'; s2.style.pointerEvents='none'; }
+  var s2=document.getElementById('s2card'); if(s2){ s2.style.opacity='.6'; s2.style.pointerEvents='none'; }
   ['a4ProjName','a4Author'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
   setSt(1);
   mmSetSum(); renderA4();
