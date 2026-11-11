@@ -1,10 +1,11 @@
 /* ═══════════════════════════════════════════════════
+   v6.1.0 2026-11-11 — 시행령 별표 1 개정(대통령령 제36817호, 2026-11-12 시행) 개정 메모 · 기준일 표기 갱신 · 판 6.1 · 캐시명 v6.1.0
    S6 회차 2026-09-05 — R24①② 표 선 separate·mono 한글 폴백 소급 동반 캐시명 v5.0.5
    S5 회차 2026-09-04 — R23② JPG 엔진 행 나눔 소급 동반 캐시명 v5.0.4
    S3-0 회차 2026-09-04 — R27 html2canvas 클론 정화 동반 캐시명 v5.0.3
    S2 회차 2026-09-04 — index 소급(R1·R21·R26 등) 동반 캐시명 v5.0.2
    R25 회차 2026-09-04 — 자기 접두어 캐시 조회 · cors 프리캐시 · opaque 가드 · 캐시명 v5.0.1 (S10)
-   건축물 용도변경 판정기  MANMIN Ver-5.0
+   건축물 용도변경 판정기  MANMIN Ver-6.1
    Service Worker — 오프라인 캐시 + 버전 업데이트  ·  ARCHITECT KIM MANMIN
    v5.0.0 (2026-09-04) — §11-3 navigate Network-first · §17-1 PREFIX · §18-7 ORPHAN · allSettled · R19 폴백
 ═══════════════════════════════════════════════════ */
@@ -22,7 +23,7 @@ const mmMatch = (req, opt) => caches.keys()
   .then((ks) => ks.reduce((p, k) => p.then((r) => r || caches.open(k).then((c) => c.match(req, opt))), Promise.resolve(undefined)))
   .then((r) => (r && r.type === 'opaque' && req && req.mode === 'cors') ? undefined : r);
 
-const CACHE  = 'yodo-v5.0.19';   /* 2026-11-01 화면 연한 글자색 보강(§25-6-29) (종전 v5.0.14) */
+const CACHE  = 'yodo-v6.1.0';   /* 2026-11-11 v6.1.0 개정 메모 · 판 6.1 (종전 v5.0.19) */  /* 2026-11-01 화면 연한 글자색 보강(§25-6-29) (종전 v5.0.14) */
 const ORPHAN = ['yodo-v1.0'];
 const ASSETS = [
   './', './index.html', './manifest.json',
