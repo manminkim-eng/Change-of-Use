@@ -27,7 +27,7 @@ const mmMatch = (req, opt) => caches.keys()
   .then((ks) => ks.reduce((p, k) => p.then((r) => r || caches.open(k).then((c) => c.match(req, opt))), Promise.resolve(undefined)))
   .then((r) => (r && r.type === 'opaque' && req && req.mode === 'cors') ? undefined : r);
 
-const CACHE  = 'yodo-v6.1.4';   /* 2026-11-11 v6.1.0 개정 메모 · 판 6.1 (종전 v5.0.19) */  /* 2026-11-01 화면 연한 글자색 보강(§25-6-29) (종전 v5.0.14) */
+const CACHE  = 'yodo-v6.1.5';   /* 2026-11-22 v6.1.5 교차검증 반영 — 임의변경 안내 보강 · */ /* 2026-11-11 v6.1.0 개정 메모 · 판 6.1 (종전 v5.0.19) */  /* 2026-11-01 화면 연한 글자색 보강(§25-6-29) (종전 v5.0.14) */
 const ORPHAN = ['yodo-v1.0'];
 const ASSETS = [
   './', './index.html', './manifest.json',
