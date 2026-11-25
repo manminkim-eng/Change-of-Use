@@ -12,6 +12,6 @@ for f in sorted(glob.glob(raw+'/s*.png')): Image.open(f).convert('RGB').save(M+'
 shutil.copy(raw+'/_marks.json',M+'/images/_marks.json'); shutil.copy(raw+'/_example.json',M+'/_tools/_example.json')
 PY
 MANUAL_DIR="$M" python3 gen_manual_cou.py
-node pdf_cou.js "$M" COU_사용자매뉴얼_Ver-5.0.pdf "건축물 용도변경 판정기 사용자 매뉴얼 Ver-5.0"
+node pdf_cou.js "$M" COU_사용자매뉴얼_Ver-6.1.pdf "건축물 용도변경 판정기 사용자 매뉴얼 Ver-6.1"
 python3 verify_manual.py "$REPO"
 node audit_responsive.js "$M/index.html" > "$RAW/_audit.json"
